@@ -1,0 +1,13 @@
+.idea
+cmake-build-debug
+cocos2d
+linux-build
+proj.android*
+proj.ios_mac
+proj.linux
+proj.win32
+.DS_Store
+~$*
+
+
+android
