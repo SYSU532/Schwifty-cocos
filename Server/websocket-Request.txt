@@ -8,8 +8,13 @@ game session request:
 if the target user is not in connection, server will send:
     reqDec||User not online
 
-When target user accepts request, server will send:
-    reqAc||targetUsername
+Accept a request:
+    accReq&&key&&senderUsername
+Server will send to the two parties in the request:
+    reqAc||opponentUsername
 
 When receiving a request, server will send:
-    recReq||senderUsername||
+    recReq||senderUsername||senderDeckCount
+
+Server warning:
+    err||message

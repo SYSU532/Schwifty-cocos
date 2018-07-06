@@ -160,3 +160,5 @@ class GameSession {
     }
 
 }
+
+exports.session = GameSession;

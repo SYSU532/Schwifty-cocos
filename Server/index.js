@@ -71,6 +71,21 @@ router.post('/userDeckInfo', async (ctx, next) => {
     ctx.response.body = JSON.stringify({deckCount: userDeck.length});
 });
 
+router.get('/gameLogOut', async (ctx, next) => {
+    let data = ctx.request.query;
+    let name = data.username;
+    let pass = data.password;
+    if (!connections[getStringMD5(name)]) {
+        ctx.response.body = "User has not signed in yet!";
+        return;
+    }
+    if (await model.TestLogIn(name, pass) === 1) {
+        connections[getStringMD5(name)].close();
+        delete connections[getStringMD5(name)];
+        ctx.response.body = "websocket connection deleted!";
+    }
+});
+
 app.use(router.routes());
 
 app.listen(17777);
@@ -80,6 +95,7 @@ console.log('The Blog Server running on port 17777....');
 /* ------  WebSocket Connection Server  ------ */
 var connections = {};
 let gameSessionArr = [];
+let gameRequest = {};
 
 var server = ws.createServer(function(conn){
     conn.on('text', async function(str){
@@ -94,15 +110,56 @@ var server = ws.createServer(function(conn){
                 }
                 let code = await model.TestLogIn(instructions[1], instructions[2]);
                 if (code === 1) {
+                    if (connections[getStringMD5(instructions[1])]) {
+                        conn.send('err||Already signed in!');
+                        return;
+                    }
                     conn.user = instructions[1];
                     var connectionID = getStringMD5(instructions[1]);
+                    conn.id = connectionID;
                     conn.send(connectionID);
                     connections[connectionID] = conn;
                     console.log('Created ws: ' + connectionID);
                 }
                 break;
+            case 'gamereq':
+                if (connections[instructions[1]].id !== instructions[1]) {
+                    conn.send('err||Invalid Request sender!');
+                    return;
+                }
+                if (!connections[getStringMD5(instructions[2])]) {
+                    conn.send('err||Requested User is not online!');
+                    return;
+                }
+                let userDeck = await gameDB.QueryUserDecks(instructions[2]);
+                let deckCount = userDeck.length;
+                connections[getStringMD5(instructions[2])].send(`recReq||${connections[instructions[1]].user}||${deckCount}`);
+                conn.send('reqPend||Request Sent');
+                gameRequest[instructions[1]] = [getStringMD5(instructions[2])];
+                break;
+            case 'accreq':
+                let targetUserMD5 = getStringMD5(instructions[2]);
+                if (connections[instructions[1]].id !== instructions[1]) {
+                    conn.send('err||Invalid Request User!');
+                    return;
+                }
+                if (!connections[getStringMD5(instructions[2])]) {
+                    conn.send('err||Sender User is not online!');
+                    return;
+                }
+                if (!gameRequest[targetUserMD5] ||
+                    gameRequest[targetUserMD5].indexOf(instructions[1]) === -1) {
+                    conn.send('err||No relevant request found!');
+                    return;
+                }
+                delete gameRequest[targetUserMD5];
+                conn.send(`reqAc||${instructions[2]}`);
+                connections[targetUserMD5].send(`reqAc||${connections[instructions[1]].user}`);
+                gameSessionArr.push(new gamePlay.session(connections[instructions[1]].user, instructions[2]));
+                break;
             default:
-                conn.send('Wrong request!' + conn.user);
+                conn.send('err||Wrong request!');
+                break;
         }
     });
 
