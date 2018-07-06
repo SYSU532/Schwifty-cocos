@@ -1,0 +1,27 @@
+{
+  "name": "schwifty-server",
+  "version": "1.0.0",
+  "description": "A server implementation for Schwifty Card Game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SYSU532",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "co": "^3.1.0",
+    "co-mysql": "^0.4.1",
+    "crypto": "^1.0.1",
+    "fs": "0.0.1-security",
+    "koa": "^2.5.1",
+    "koa-body": "^4.0.4",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "koa-session-minimal": "^3.0.4",
+    "koa-static": "^5.0.0",
+    "koa-views": "^6.1.4",
+    "mysql": "^2.15.0",
+    "nodejs-websocket": "^1.7.1",
+    "path": "^0.12.7"
+  }
+}

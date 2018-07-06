@@ -1,0 +1,14 @@
+[
+  {
+    "index": 0,
+    "attack": 2,
+    "name": "Rainbow Morty",
+    "type": "normal"
+  },
+  {
+    "index": 1,
+    "attack": 1,
+    "name": "Rabbit Morty",
+    "type": "exotic"
+  }
+]

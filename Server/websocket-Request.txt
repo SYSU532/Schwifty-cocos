@@ -1,0 +1,15 @@
+Login:
+    login&&username&&password
+will return:
+    loginAcc||KeyStr
+
+game session request:
+    gameReq&&key&&targetUsername
+if the target user is not in connection, server will send:
+    reqDec||User not online
+
+When target user accepts request, server will send:
+    reqAc||targetUsername
+
+When receiving a request, server will send:
+    recReq||senderUsername||
