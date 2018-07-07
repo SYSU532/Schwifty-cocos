@@ -62,5 +62,17 @@ Get ground 获取牌局上对应用户打出的牌：
 return(三个 weight 依次为 normal，epic，exotic 行的权值,若对应玩家本局不再出牌，则 end 为 true，否则为 false):
     ground||username||end||weight1||weight2||weight3||id||id||...
 
+Update location更新用户位置：
+    update&&sessionKey&&rickType&&x&&y
+Other User will receive:
+    newLoc||username||rickType||x||y
+if it's the first time this user update the position:
+    newUsr||username||rickType||x||y
+
+Get all User Locations获取所有用户位置:
+    allLoc
+return:
+    locs||username1||rick1||x1||y1||user2||rick2||x2||y2||...
+
 Server warning:
     err||message

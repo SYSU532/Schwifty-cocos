@@ -114,6 +114,7 @@ let wsServer = new WebSocketServer({
 var connections = {};
 let gameSessionArr = {};
 let gameRequest = {};
+let userLocations = {};
 
 wsServer.on('request', function(request){
     console.log(new Date() + ' Connection accepted.');
@@ -366,6 +367,48 @@ wsServer.on('request', function(request){
                         conn.sendUTF('err||Requested User is not in this session!');
                     }
                 }
+                break;
+            //update&&sessionKey&&rickType&&x&&y
+            case 'update':
+                if (conn.id !== instructions[1]) {
+                    conn.sendUTF('err||Invalid Request sender!');
+                    return;
+                }
+                if (instructions.length !== 5) {
+                    conn.sendUTF('err||Request parameters invalid!');
+                    return;
+                }
+                else {
+                    let loc = {
+                        x: instructions[3],
+                        y: instructions[4],
+                        rickType: instructions[2]
+                    };
+                    if (!userLocations[conn.user]) {
+                        for (let key in connections) {
+                            let userConn = connections[key];
+                            if (userConn.user !== conn.user) {
+                                userConn.sendUTF(`newUsr||${conn.user}||${loc.rickType}||${loc.x}||${loc.y}`);
+                            }
+                        }
+                    }
+                    userLocations[conn.user] = loc;
+                    for (let key in connections) {
+                        let userConn = connections[key];
+                        if (userConn.user !== conn.user) {
+                            userConn.sendUTF(`newLoc||${conn.user}||${loc.rickType}||${loc.x}||${loc.y}`);
+                        }
+                    }
+                }
+                break;
+            //allLoc
+            case 'allloc':
+                let msg = 'locs';
+                for (let user in userLocations) {
+                    let loc = userLocations[user];
+                    msg += `||${user}||${loc.rickType}||${loc.x}||${loc.y}`;
+                }
+                conn.sendUTF(msg);
                 break;
             default:
                 conn.sendUTF('err||Wrong request!');
