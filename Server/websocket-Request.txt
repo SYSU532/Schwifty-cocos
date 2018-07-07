@@ -29,26 +29,38 @@ return:
 Get all deck 获取用户所有卡组：
     getAllDeck&&username
 return:
-    allDeck||id||id||...
+    allDeck||username||id||id||...
 
 Play a card打出一张牌:
     play&&sessionKey&&index
 return:
-    play||Success
+    (self)play||Success
+    (opponent)opPlay||index
 Error:
     err||msg
 
 end round 玩家本局不再出牌：
     endRound&&sessionKey
 return:
-    endRound||Success
+    (self)endRound||Success
+    (opponent)opEndRound
 Error:
     err||msg
 
 Get attack point 获取当前局指定玩家的攻击点数：
     attackPt&&sessionKey&&username
 return:
-    attackPt||normal||epic||exotic||total
+    attackPt||usernane||normal||epic||exotic||total
+
+Get current session status 获取当前战局比分情况
+    getStatus&&sessionKey
+return（win1和 win2分别为玩家1和玩家2当前的获胜局数，deck1和 deck2 分别为两玩家手牌数）:
+    status||win1||win2||deck1||deck2
+
+Get ground 获取牌局上对应用户打出的牌：
+    getGround&&sessionKey&&username
+return(三个 weight 依次为 normal，epic，exotic 行的权值,若对应玩家本局不再出牌，则 end 为 true，否则为 false):
+    ground||username||end||weight1||weight2||weight3||id||id||...
 
 Server warning:
     err||message
