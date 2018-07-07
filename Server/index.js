@@ -152,7 +152,7 @@ var server = ws.createServer(function(conn){
                     conn.send('err||No relevant request found!');
                     return;
                 }
-                delete gameRequest[targetUserMD5];
+                gameRequest[targetUserMD5].splice(gameRequest[targetUserMD5].indexOf(instructions[1]));
                 conn.send(`reqAc||${instructions[2]}`);
                 connections[targetUserMD5].send(`reqAc||${connections[instructions[1]].user}`);
                 gameSessionArr.push(new gamePlay.session(connections[instructions[1]].user, instructions[2]));
@@ -164,11 +164,12 @@ var server = ws.createServer(function(conn){
     });
 
     conn.on('close', async function(code, reason){
-        console.log(code);
-        console.log(reason);
+        console.log("Close: " + conn.user);
+        delete connections[conn.id];
     });
 
     conn.on('error', async function(code, reason){
+        console.log("Error: " + conn.user);
         console.log(code);
         console.log(reason);
     });
