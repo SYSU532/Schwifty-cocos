@@ -7,6 +7,8 @@ game session request 游戏邀请:
     gameReq&&key&&targetUsername
 if 对方不在线, server will send:
     reqDec||User not online
+else
+    reqPend||Request Sent
 
 Accept a request 接受邀请:
     accReq&&key&&senderUsername
