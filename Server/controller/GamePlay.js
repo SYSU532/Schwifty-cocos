@@ -180,6 +180,9 @@ class GameSession {
             if (!this.stop2)
                 this.currentPlayer = this.UserTwo;
             this.deckOne.splice(this.deckOne.indexOf(cardIndex), 1);
+            if (this.deckOne.length === 0) {
+                this.stopRound(this.UserOne);
+            }
             return {status: true};
         }
         else if (this.currentPlayer === this.UserTwo && this.UserTwo === username) {
@@ -190,6 +193,9 @@ class GameSession {
             if (!this.stop1)
                 this.currentPlayer = this.UserOne;
             this.deckTwo.splice(this.deckTwo.indexOf(cardIndex), 1);
+            if (this.deckTwo.length === 0) {
+                this.stopRound(this.UserTwo);
+            }
             return {status: true};
         }
         else console.log(`Unexpected Card Play: ${this.currentPlayer}, ${this.UserOne}, ${this.UserTwo}`);

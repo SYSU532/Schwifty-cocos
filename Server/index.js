@@ -114,6 +114,7 @@ let wsServer = new WebSocketServer({
 var connections = {};
 let gameSessionArr = {};
 let gameRequest = {};
+let userLocations = {};
 
 wsServer.on('request', function(request){
     console.log(new Date() + ' Connection accepted.');
@@ -125,6 +126,7 @@ wsServer.on('request', function(request){
         let instructions = str.split('&&');
         console.log(instructions);
         switch (instructions[0].toLowerCase()) {
+            //login&&username&&password
             case 'login':
                 if (instructions.length !== 3) {
                     conn.sendUTF("Invalid number of params");
@@ -144,6 +146,7 @@ wsServer.on('request', function(request){
                     console.log('Created ws: ' + connectionID);
                 }
                 break;
+            //gameReq&&key&&targetUsername
             case 'gamereq':
                 if (conn.id !== instructions[1]) {
                     conn.sendUTF('err||Invalid Request sender!');
@@ -162,6 +165,7 @@ wsServer.on('request', function(request){
                 else
                     gameRequest[instructions[1]] = [getStringMD5(instructions[2])];
                 break;
+            //accReq&&key&&senderUsername
             case 'accreq':
                 let targetUserMD5 = getStringMD5(instructions[2]);
                 if (conn.id !== instructions[1]) {
@@ -183,6 +187,7 @@ wsServer.on('request', function(request){
                 connections[targetUserMD5].sendUTF(`reqAc||${connections[instructions[1]].user}||${sessionKey}`);
                 gameSessionArr[sessionKey] = new gamePlay.session(connections[instructions[1]].user, instructions[2]);
                 break;
+            //allReq&&key
             case 'allreq':
                 let returnMsg = 'allReq';
                 if (conn.id !== instructions[1]) {
@@ -200,6 +205,7 @@ wsServer.on('request', function(request){
                 }
                 conn.sendUTF(returnMsg);
                 break;
+             //getDeck&&sessionKey
             case 'getdeck':
                 if (!gameSessionArr[instructions[1]]) {
                     conn.sendUTF('err||Requested session invalid!');
@@ -223,11 +229,12 @@ wsServer.on('request', function(request){
                 }
                 else conn.sendUTF('err||User is not in the session!');
                 break;
+            //getAllDeck&&username
             case 'getalldeck':
                 if (!!instructions[1]) {
                     try {
                         let allDeck = await gameDB.QueryUserDecks(instructions[1]);
-                        let msg = "allDeck";
+                        let msg = `allDeck||${instructions[1]}`;
                         for (let card of allDeck) {
                             msg += "||" + card;
                         }
@@ -238,6 +245,7 @@ wsServer.on('request', function(request){
                     }
                 }
                 break;
+            //play&&sessionKey&&index
             case 'play':
                 if (!gameSessionArr[instructions[1]]) {
                     conn.sendUTF('err||Requested session invalid!');
@@ -247,10 +255,17 @@ wsServer.on('request', function(request){
                     let result = gameSessionArr[instructions[1]].playCard(conn.user, instructions[2]);
                     if (result.status) {
                         conn.sendUTF('play||Success');
+                        if (conn.user === gameSessionArr[instructions[1]].UserOne) {
+                            connections[getStringMD5(gameSessionArr[instructions[1]].UserTwo)].sendUTF(`opPlay||${instructions[2]}`);
+                        }
+                        else if (conn.user === gameSessionArr[instructions[1]].UserTwo) {
+                            connections[getStringMD5(gameSessionArr[instructions[1]].UserOne)].sendUTF(`opPlay||${instructions[2]}`);
+                        }
                     }
                     else conn.sendUTF('err||' + result.msg);
                 }
                 break;
+            //endRound&&sessionKey
             case 'endround':
                 if (!gameSessionArr[instructions[1]]) {
                     conn.sendUTF('err||Requested session invalid!');
@@ -260,10 +275,17 @@ wsServer.on('request', function(request){
                     let result = gameSessionArr[instructions[1]].stopRound(conn.user);
                     if (result.status) {
                         conn.sendUTF('endRound||Success');
+                        if (conn.user === gameSessionArr[instructions[1]].UserOne) {
+                            connections[getStringMD5(gameSessionArr[instructions[1]].UserTwo)].sendUTF(`opEndRound`);
+                        }
+                        else if (conn.user === gameSessionArr[instructions[1]].UserTwo) {
+                            connections[getStringMD5(gameSessionArr[instructions[1]].UserOne)].sendUTF(`opEndRound`);
+                        }
                     }
                     else conn.sendUTF('err||' + result.msg);
                 }
                 break;
+             //attackPt&&sessionKey&&username
             case 'attackpt':
                 if (!gameSessionArr[instructions[1]]) {
                     conn.sendUTF('err||Requested session invalid!');
@@ -271,13 +293,13 @@ wsServer.on('request', function(request){
                 }
                 else {
                     if (gameSessionArr[instructions[1]].UserOne === instructions[2]) {
-                        let msg = "attackPt||";
+                        let msg = `attackPt||${instructions[2]}||`;
                         let ground = gameSessionArr[instructions[1]].ground1;
                         msg += `${ground.NormalAttack}||${ground.EpicAttack}||${ground.ExoticAttack}||${ground.TotalAttck}`;
                         conn.sendUTF(msg);
                     }
                     else if (gameSessionArr[instructions[1]].UserTwo === instructions[2]) {
-                        let msg = "attackPt||";
+                        let msg = `attackPt||${instructions[2]}||`;
                         let ground = gameSessionArr[instructions[1]].ground2;
                         msg += `${ground.NormalAttack}||${ground.EpicAttack}||${ground.ExoticAttack}||${ground.TotalAttck}`;
                         conn.sendUTF(msg);
@@ -286,6 +308,107 @@ wsServer.on('request', function(request){
                         conn.sendUTF('err||Requested User is not in this session!');
                     }
                 }
+                break;
+            //getStatus&&sessionKey
+            case 'getstatus':
+                if (!gameSessionArr[instructions[1]]) {
+                    conn.sendUTF('err||Requested session invalid!');
+                    return;
+                }
+                else {
+                    let returnMsg = `status`;
+                    returnMsg += `||${gameSessionArr[instructions[1]].wins1}`;
+                    returnMsg += `||${gameSessionArr[instructions[1]].wins2}`;
+                    returnMsg += `||${gameSessionArr[instructions[1]].deckOne.length}`;
+                    returnMsg += `||${gameSessionArr[instructions[1]].deckTwo.length}`;
+                    conn.sendUTF(returnMsg);
+                }
+                break;
+            //getGround&&sessionKey&&username
+            case 'getground':
+                if (!gameSessionArr[instructions[1]]) {
+                    conn.sendUTF('err||Requested session invalid!');
+                    return;
+                }
+                else {
+                    if (gameSessionArr[instructions[1]].UserOne === instructions[2]) {
+                        let msg = `ground||${instructions[2]}||`;
+                        let ground = gameSessionArr[instructions[1]].ground1;
+                        msg += gameSessionArr[instructions[1]].stop1 ? "true" : "false";
+                        msg += `${ground.normalWeight}||${ground.epicWeight}||${ground.exoticWeight}`;
+                        for (let card of ground.normals) {
+                            msg += `||${card.cardIndex}`;
+                        }
+                        for (let card of ground.epics) {
+                            msg += `||${card.cardIndex}`;
+                        }
+                        for (let card of ground.exotics) {
+                            msg += `||${card.cardIndex}`;
+                        }
+                        conn.sendUTF(msg);
+                    }
+                    else if (gameSessionArr[instructions[1]].UserTwo === instructions[2]) {
+                        let msg = `ground||${instructions[2]}||`;
+                        let ground = gameSessionArr[instructions[1]].ground2;
+                        msg += gameSessionArr[instructions[1]].stop2 ? "true" : "false";
+                        msg += `${ground.normalWeight}||${ground.epicWeight}||${ground.exoticWeight}`;
+                        for (let card of ground.normals) {
+                            msg += `||${card.cardIndex}`;
+                        }
+                        for (let card of ground.epics) {
+                            msg += `||${card.cardIndex}`;
+                        }
+                        for (let card of ground.exotics) {
+                            msg += `||${card.cardIndex}`;
+                        }
+                        conn.sendUTF(msg);
+                    }
+                    else {
+                        conn.sendUTF('err||Requested User is not in this session!');
+                    }
+                }
+                break;
+            //update&&sessionKey&&rickType&&x&&y
+            case 'update':
+                if (conn.id !== instructions[1]) {
+                    conn.sendUTF('err||Invalid Request sender!');
+                    return;
+                }
+                if (instructions.length !== 5) {
+                    conn.sendUTF('err||Request parameters invalid!');
+                    return;
+                }
+                else {
+                    let loc = {
+                        x: instructions[3],
+                        y: instructions[4],
+                        rickType: instructions[2]
+                    };
+                    if (!userLocations[conn.user]) {
+                        for (let key in connections) {
+                            let userConn = connections[key];
+                            if (userConn.user !== conn.user) {
+                                userConn.sendUTF(`newUsr||${conn.user}||${loc.rickType}||${loc.x}||${loc.y}`);
+                            }
+                        }
+                    }
+                    userLocations[conn.user] = loc;
+                    for (let key in connections) {
+                        let userConn = connections[key];
+                        if (userConn.user !== conn.user) {
+                            userConn.sendUTF(`newLoc||${conn.user}||${loc.rickType}||${loc.x}||${loc.y}`);
+                        }
+                    }
+                }
+                break;
+            //allLoc
+            case 'allloc':
+                let msg = 'locs';
+                for (let user in userLocations) {
+                    let loc = userLocations[user];
+                    msg += `||${user}||${loc.rickType}||${loc.x}||${loc.y}`;
+                }
+                conn.sendUTF(msg);
                 break;
             default:
                 conn.sendUTF('err||Wrong request!');
