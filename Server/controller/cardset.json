@@ -1,0 +1,218 @@
+[
+  {
+    "attack": 5,
+    "type": "normal",
+    "name": "Morty",
+    "index": 0
+  },
+  {
+    "attack": 5,
+    "type": "normal",
+    "name": "AdSpaceMorty",
+    "index": 1
+  },
+  {
+    "attack": 5,
+    "type": "normal",
+    "name": "BigHeadMorty",
+    "index": 2
+  },
+  {
+    "attack": 6,
+    "type": "normal",
+    "name": "BlueShirtMorty",
+    "index": 3
+  },
+  {
+    "attack": 7,
+    "type": "normal",
+    "name": "DoubleMorty",
+    "index": 4
+  },
+  {
+    "attack": 7,
+    "type": "normal",
+    "name": "ExoAlphaMorty",
+    "index": 5
+  },
+  {
+    "attack": 7,
+    "type": "normal",
+    "name": "MoonMorty",
+    "index": 6
+  },
+  {
+    "attack": 6,
+    "type": "normal",
+    "name": "MustacheMorty",
+    "index": 7
+  },
+  {
+    "attack": 7,
+    "type": "normal",
+    "name": "NoEyeMorty",
+    "index": 8
+  },
+  {
+    "attack": 17,
+    "type": "exotic",
+    "name": "BlackHoleMorty",
+    "index": 9
+  },
+  {
+    "attack": 16,
+    "type": "exotic",
+    "name": "BoulderMorty",
+    "index": 10
+  },
+  {
+    "attack": 16,
+    "type": "exotic",
+    "name": "GaseousMorty",
+    "index": 11
+  },
+  {
+    "attack": 15,
+    "type": "exotic",
+    "name": "ShadowMorty",
+    "index": 12
+  },
+  {
+    "attack": 16,
+    "type": "exotic",
+    "name": "SkeletonMorty",
+    "index": 13
+  },
+  {
+    "attack": 12,
+    "type": "epic",
+    "name": "AndroidMorty",
+    "index": 14
+  },
+  {
+    "attack": 11,
+    "type": "epic",
+    "name": "ArmomalyMorty",
+    "index": 15
+  },
+  {
+    "attack": 10,
+    "type": "epic",
+    "name": "BlockyMorty",
+    "index": 16
+  },
+  {
+    "attack": 10,
+    "type": "epic",
+    "name": "ButtFaceMorty",
+    "index": 17
+  },
+  {
+    "attack": 10,
+    "type": "epic",
+    "name": "LooRollMorty",
+    "index": 18
+  },
+  {
+    "attack": 10,
+    "type": "epic",
+    "name": "PickleMorty",
+    "index": 19
+  },
+  {
+    "attack": 12,
+    "type": "epic",
+    "name": "RoninMorty",
+    "index": 20
+  },
+  {
+    "attack": 11,
+    "type": "epic",
+    "name": "SnowmanMorty",
+    "index": 21
+  },
+  {
+    "attack": 11,
+    "type": "epic",
+    "name": "StoolMorty",
+    "index": 22
+  },
+  {
+    "attack": 12,
+    "type": "epic",
+    "name": "WonderMorty",
+    "index": 23
+  },
+  {
+    "attack": 6,
+    "type": "normal",
+    "name": "OldMorty",
+    "index": 24
+  },
+  {
+    "attack": 6,
+    "type": "normal",
+    "name": "PeaceMorty",
+    "index": 25
+  },
+  {
+    "attack": 5,
+    "type": "normal",
+    "name": "PizzaMorty",
+    "index": 26
+  },
+  {
+    "attack": 6,
+    "type": "normal",
+    "name": "PoorlyClonedMorty",
+    "index": 27
+  },
+  {
+    "attack": 5,
+    "type": "normal",
+    "name": "RabbitMorty",
+    "index": 28
+  },
+  {
+    "attack": 5,
+    "type": "normal",
+    "name": "ScruffyMorty",
+    "index": 29
+  },
+  {
+    "attack": 6,
+    "type": "normal",
+    "name": "SelfDefenseMorty",
+    "index": 30
+  },
+  {
+    "attack": 7,
+    "type": "normal",
+    "name": "SpookyMorty",
+    "index": 31
+  },
+  {
+    "attack": 6,
+    "type": "normal",
+    "name": "StrawberryMorty",
+    "index": 32
+  },
+  {
+    "attack": 5,
+    "type": "normal",
+    "name": "TestX1Morty",
+    "index": 33
+  },
+  {
+    "attack": 6,
+    "type": "normal",
+    "name": "VeinyMorty",
+    "index": 34
+  },
+  {
+    "attack": 25,
+    "type": "exotic",
+    "name": "TheOneTrueMorty",
+    "index": 35
+  }
+]
