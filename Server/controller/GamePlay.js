@@ -92,6 +92,9 @@ class GameSession {
         // The rounds that each player has won
         this.wins1 = 0;
         this.wins2 = 0;
+        //Indicate whether the player has folded
+        this.stop1 = false;
+        this.stop2 = false;
         // The Card ground of each player, clear on each round
         this.ground1 = new Ground();
         this.ground2 = new Ground();
@@ -147,13 +150,35 @@ class GameSession {
         this.currentRound++;
     }
 
+    stopRound(username) {
+        if (this.currentPlayer === this.UserOne && this.UserOne === username) {
+            this.stop1 = true;
+            if (this.stop2) {
+                this.endRound();
+                return {status: true, nextRound: true};
+            }
+            return {status: true, nextRound: false};
+        }
+        else if (this.currentPlayer === this.UserTwo && this.UserTwo === username) {
+            this.stop2 = true;
+            if (this.stop1) {
+                this.endRound();
+                return {status: true, nextRound: true};
+            }
+            return {status: true, nextRound: false};
+        }
+        else console.log(`Unexpected User: ${this.currentPlayer}, ${this.UserOne}, ${this.UserTwo}`);
+        return {status: false, msg: 'Wrong player'};
+    }
+
     playCard(username, cardIndex) {
         if (this.currentPlayer === this.UserOne && this.UserOne === username) {
             if (this.deckOne.indexOf(cardIndex) === -1) {
                 return {status: false, msg: 'Player does not have the card.'}
             }
             this.ground1.addCard(cardIndex);
-            this.currentPlayer = this.UserTwo;
+            if (!this.stop2)
+                this.currentPlayer = this.UserTwo;
             this.deckOne.splice(this.deckOne.indexOf(cardIndex), 1);
             return {status: true};
         }
@@ -162,7 +187,8 @@ class GameSession {
                 return {status: false, msg: 'Player does not have the card.'}
             }
             this.ground2.addCard(cardIndex);
-            this.currentPlayer = this.UserOne;
+            if (!this.stop1)
+                this.currentPlayer = this.UserOne;
             this.deckTwo.splice(this.deckTwo.indexOf(cardIndex), 1);
             return {status: true};
         }

@@ -26,5 +26,29 @@ Get current deck 获取当前卡组：
 return:
     deck||id||id||...
 
+Get all deck 获取用户所有卡组：
+    getAllDeck&&username
+return:
+    allDeck||id||id||...
+
+Play a card打出一张牌:
+    play&&sessionKey&&index
+return:
+    play||Success
+Error:
+    err||msg
+
+end round 玩家本局不再出牌：
+    endRound&&sessionKey
+return:
+    endRound||Success
+Error:
+    err||msg
+
+Get attack point 获取当前局指定玩家的攻击点数：
+    attackPt&&sessionKey&&username
+return:
+    attackPt||normal||epic||exotic||total
+
 Server warning:
     err||message

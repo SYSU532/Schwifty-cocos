@@ -223,6 +223,70 @@ wsServer.on('request', function(request){
                 }
                 else conn.sendUTF('err||User is not in the session!');
                 break;
+            case 'getalldeck':
+                if (!!instructions[1]) {
+                    try {
+                        let allDeck = await gameDB.QueryUserDecks(instructions[1]);
+                        let msg = "allDeck";
+                        for (let card of allDeck) {
+                            msg += "||" + card;
+                        }
+                        conn.sendUTF(msg);
+                    }
+                    catch (err) {
+                        conn.sendUTF('err||Failed to get user deck.');
+                    }
+                }
+                break;
+            case 'play':
+                if (!gameSessionArr[instructions[1]]) {
+                    conn.sendUTF('err||Requested session invalid!');
+                    return;
+                }
+                else {
+                    let result = gameSessionArr[instructions[1]].playCard(conn.user, instructions[2]);
+                    if (result.status) {
+                        conn.sendUTF('play||Success');
+                    }
+                    else conn.sendUTF('err||' + result.msg);
+                }
+                break;
+            case 'endround':
+                if (!gameSessionArr[instructions[1]]) {
+                    conn.sendUTF('err||Requested session invalid!');
+                    return;
+                }
+                else {
+                    let result = gameSessionArr[instructions[1]].stopRound(conn.user);
+                    if (result.status) {
+                        conn.sendUTF('endRound||Success');
+                    }
+                    else conn.sendUTF('err||' + result.msg);
+                }
+                break;
+            case 'attackpt':
+                if (!gameSessionArr[instructions[1]]) {
+                    conn.sendUTF('err||Requested session invalid!');
+                    return;
+                }
+                else {
+                    if (gameSessionArr[instructions[1]].UserOne === instructions[2]) {
+                        let msg = "attackPt||";
+                        let ground = gameSessionArr[instructions[1]].ground1;
+                        msg += `${ground.NormalAttack}||${ground.EpicAttack}||${ground.ExoticAttack}||${ground.TotalAttck}`;
+                        conn.sendUTF(msg);
+                    }
+                    else if (gameSessionArr[instructions[1]].UserTwo === instructions[2]) {
+                        let msg = "attackPt||";
+                        let ground = gameSessionArr[instructions[1]].ground2;
+                        msg += `${ground.NormalAttack}||${ground.EpicAttack}||${ground.ExoticAttack}||${ground.TotalAttck}`;
+                        conn.sendUTF(msg);
+                    }
+                    else {
+                        conn.sendUTF('err||Requested User is not in this session!');
+                    }
+                }
+                break;
             default:
                 conn.sendUTF('err||Wrong request!');
                 break;
