@@ -1,7 +1,9 @@
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
+#include "CardScene.h"
 
 USING_NS_CC;
+using namespace CocosDenshion;
 
 Scene* HelloWorld::createScene()
 {
@@ -24,118 +26,136 @@ bool HelloWorld::init()
     {
         return false;
     }
+	Director::getInstance()->getOpenGLView()->setFrameSize(1060, 704);
 
 	visibleSize = Director::getInstance()->getVisibleSize();
 	origin = Director::getInstance()->getVisibleOrigin();
-    /////////////////////////////
-    // 2. add a menu item with "X" image, which is clicked to quit the program
-    //    you may modify it.
+    
+	username = UserDefault::getInstance()->getStringForKey("username");
+	std::string head = username + "_head";
+	auto userRick = UserDefault::getInstance()->getIntegerForKey(head.c_str()) - 1;
+	std::string headPath = "characters/" + Value(userRick).asString() + "/Rick4.png";
+	path = "characters/" + Value(userRick).asString();
 
-    // add a "close" icon to exit the progress. it's an autorelease object
-    auto closeItem = MenuItemImage::create(
-                                           "CloseNormal.png",
-                                           "CloseSelected.png",
-                                           CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
-	auto clickLabel = Label::createWithTTF("Click Me", "fonts/Marker Felt.ttf", 25);
-	clickLabel->enableOutline(Color4B::ORANGE, 3);
-	//auto clickItem = MenuItemLabel::create(clickLabel, CC_CALLBACK_1(HelloWorld::menuClickCallback, this));
-	
-
-    if (closeItem == nullptr ||
-        closeItem->getContentSize().width <= 0 ||
-        closeItem->getContentSize().height <= 0)
-    {
-        problemLoading("'CloseNormal.png' and 'CloseSelected.png'");
-    }
-    else
-    {
-        float x = origin.x + visibleSize.width - closeItem->getContentSize().width/2;
-        float y = origin.y + closeItem->getContentSize().height/2;
-        closeItem->setPosition(Vec2(x,y));
-		//clickItem->setPosition(Vec2(x - 30, y + 50));
-    }
-
-    // create menu, it's an autorelease object
-    auto menu1 = Menu::create(closeItem, NULL);
-	//auto menu2 = Menu::create(clickItem, NULL);
-    menu1->setPosition(Vec2::ZERO);
-	//menu2->setPosition(Vec2::ZERO);
-    this->addChild(menu1, 1);
-	//this->addChild(menu2, 1);
-
-    /////////////////////////////
-    // 3. add your codes below...
-
-    // add a label shows "Hello World"
-    // create and initialize a label
-	auto back = Sprite::create("img/bg.png");
-	back->setPosition(visibleSize / 2);
-	back->setScale(visibleSize.width / back->getContentSize().width,
-		visibleSize.height / back->getContentSize().height);
-	this->addChild(back, 0);
-	player = Sprite::create("Rick12.png");
-	player->setPosition(visibleSize.width / 2, player->getContentSize().height);
+	player = Sprite::create(headPath);
+	player->setPosition(visibleSize.width / 3, visibleSize.height / 4 + 100);
+	player->setScale(0.3);
 	this->addChild(player, 1);
-	//placeTileMap();
+	placeTileMap();
+
+	book = Sprite::create("book.png");
+	book->setPosition(Vec2(visibleSize.width  - 110, visibleSize.height + 20));
+	book->setScale(0.35);
+	this->addChild(book, 1);
 
 	auto winSize = Director::sharedDirector()->getWinSize();
-	cam = Camera::create();
+	cam = Camera::createPerspective(60.0, (float)winSize.width / winSize.height, 1, 1000);
+	cam->setRotation3D(Vec3(-45, 0, 0));
 	this->addChild(cam);
 	
+	initUserInfo();
+
 	addTouchListener();
+	addMouseListener();
 	addKeyBoardListener();
 
+	preLoadMusic();
+	playBgm();
+
 	schedule(schedule_selector(HelloWorld::update), 0.05f, kRepeatForever, 0);
+
+	state = 0;
+	outFlag = false;
 
     return true;
 }
 
 void HelloWorld::update(float f) {
-	if (isMove)
+	if (isMove) {
 		move(movekey);
-	// Other Events
 
+	}
+	cam->setPosition3D(player->getPosition3D());
+
+}
+
+void HelloWorld::preLoadMusic() {
+	auto audio = SimpleAudioEngine::getInstance();
+	audio->preloadBackgroundMusic("music/jazz.mp3");
+	
+
+}
+
+void HelloWorld::playBgm() {
+	auto audio = SimpleAudioEngine::getInstance();
+	audio->playBackgroundMusic("music/jazz.mp3", true);
+
+}
+
+void HelloWorld::initUserInfo() {
+	username = UserDefault::getInstance()->getStringForKey("username");
+	userLevel = 10;
+	userCardsNum = 13;
+	userHeadImgType = 0;
+	std::string headPath = path + "/head.png";
+
+	auto userHead = Sprite::create(headPath);
+	userHead->setPosition(Vec2(visibleSize.width - 20, visibleSize.height - 70));
+	userHead->setScale(0.3);
+	auto name = Label::createWithTTF(username, "fonts/Marker Felt.ttf", 18);
+	auto cSize = userHead->getPosition();
+	name->setPosition(Vec2(cSize.x, cSize.y - 50));
+	
+	
+	this->addChild(name, 2);
+	this->addChild(userHead, 1);
 }
 
 void HelloWorld::attack() {
-	Vector<SpriteFrame*> Attack;
-	Attack.reserve(8);
-	char attackPath[20];
-	for (int i = 0; i < 8; i++) {
-		sprintf(attackPath, "img/attack%d.png", i);
-		auto frame = SpriteFrame::create(attackPath, Rect(0, 0, 300, 300));
-		Attack.pushBack(frame);
-	}
-	auto animation = Animation::createWithSpriteFrames(Attack, 0.1f);
-	auto animate = Animate::create(animation);
-	player->stopAllActions();
-	player->runAction(animate);
+	Scene* s = CardScene::createScene();
+	auto animate = TransitionFade::create(1.5f, s);
+	CCDirector::sharedDirector()->replaceScene(animate);
+	auto audio = SimpleAudioEngine::getInstance();
+	audio->stopBackgroundMusic();
 }
 
 void HelloWorld::move(char dir) {
-	Vector<SpriteFrame*> Move;
-	Move.reserve(6);
-	char movePath[20];
-	for (int i = 12; i < 16; i++) {
-		sprintf(movePath, "Rick%d.png", i);
-		auto frame = SpriteFrame::create(movePath, Rect(0, 0, 125, 165));
-		Move.pushBack(frame);
+	if (player->getNumberOfRunningActions() > 0) {
+		return;
 	}
-
+	auto dirc = 0;
 	auto offset = Vec2(0, 0);
 	switch (dir) {
 		case 'W':
-			offset.y = 30;
+			offset.y = 10;
+			dirc = 8;
 			break;
 		case 'A':
-			offset.x = -30;
+			offset.x = -10;
+			dirc = 4;
 			break;
 		case 'S':
-			offset.y = -30;
+			offset.y = -10;
 			break;
 		case 'D':
-			offset.x = 30;
+			offset.x = 10;
+			dirc = 12;
 	}
+
+	Vector<SpriteFrame*> Move;
+	Move.reserve(1);
+	char movePath[40];
+	std::string realPath = path + "/Rick%d.png";
+	sprintf(movePath, realPath.c_str(), dirc + state);
+	auto frame = SpriteFrame::create(movePath, Rect(0, 0, 125, 162));
+	Move.pushBack(frame);
+	if (state == 3) {
+		state = 0;
+	}
+	else {
+		state++;
+	}
+
 	auto dest = offset + player->getPosition();
 	if (dest.x < 0)
 		dest.x = 0;
@@ -145,11 +165,12 @@ void HelloWorld::move(char dir) {
 		dest.y = 0;
 	else if (dest.y > visibleSize.height)
 		dest.y = visibleSize.height;
-	auto move = MoveTo::create(0.5f, dest);
+		
+	auto move = MoveTo::create(0.1f, dest);
 	auto animation = Animation::createWithSpriteFrames(Move, 0.2f);
 	auto animate = Animate::create(animation);
 
-	auto repeat = RepeatForever::create(animate);
+	auto repeat = Repeat::create(animate, 1);
 	player->runAction(repeat);
 	player->runAction(move);
 }
@@ -157,10 +178,9 @@ void HelloWorld::move(char dir) {
 void HelloWorld::placeTileMap() {
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	TMXTiledMap* map = TMXTiledMap::create("map.tmx");
+	TMXTiledMap* map = TMXTiledMap::create("test.tmx");
 	map->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 	map->setAnchorPoint(Vec2(0.5, 0.5));
-	map->setScale(Director::getInstance()->getContentScaleFactor());
 	this->addChild(map, 0);
 }
 
@@ -171,6 +191,12 @@ void HelloWorld::addTouchListener() {
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
 }
 
+void HelloWorld::addMouseListener() {
+	auto mouseListener = EventListenerMouse::create();
+	mouseListener->onMouseMove = CC_CALLBACK_1(HelloWorld::onMouseMoved, this);
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouseListener, book);
+}
+
 void HelloWorld::addKeyBoardListener() {
 	auto keyListener = EventListenerKeyboard::create();
 	keyListener->onKeyPressed = CC_CALLBACK_2(HelloWorld::onKeyPress, this);
@@ -178,13 +204,27 @@ void HelloWorld::addKeyBoardListener() {
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyListener, this);
 }
 
+void HelloWorld::onMouseMoved(Event* e) {
+	EventMouse* ee = (EventMouse*)e;
+	Vec2 pos = Vec2(ee->getCursorX(), ee->getCursorY());
+	if (book->getPosition().getDistance(pos) <= 40) {
+		if (!outFlag) {
+			outFlag = true;
+			auto animate = MoveTo::create(1.0f, Vec2(book->getPosition().x, book->getPosition().y - 50));
+			book->runAction(animate);
+		}
+	}
+	else {
+		if (outFlag) {
+			auto animate = MoveTo::create(1.0f, Vec2(book->getPosition().x, book->getPosition().y + 50));
+			book->runAction(animate);
+		}
+		outFlag = false;
+	}
+}
+
 void HelloWorld::onTouchMoved(Touch* touchs, Event* event) {
-	/*Point newPos = touchs->getDelta();
-	Vec3 cameraPos = cam->getPosition3D();
-	cameraPos.y -= newPos.y;
-	cameraPos.x -= newPos.x;
-	cam->setPosition3D(cameraPos);
-	*/
+	
 }
 
 bool HelloWorld::onTouchBegin(Touch* touch, Event* event) {

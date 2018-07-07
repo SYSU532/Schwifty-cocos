@@ -23,6 +23,7 @@ public:
 	void move(char c);
 
 	void update(float f);
+	void initUserInfo();
 
 	// Touch Functions
 	void onTouchMoved(Touch* touch, Event* event);
@@ -32,9 +33,17 @@ public:
 	void onKeyPress(EventKeyboard::KeyCode code, Event* event);
 	void onKeyReleased(EventKeyboard::KeyCode code, Event* event);
 
+	// Mouse Functions
+	void onMouseMoved(Event* event);
+
 	// Event Listeners
 	void addTouchListener();
+	void addMouseListener();
 	void addKeyBoardListener();
+
+	// Music Handler
+	void preLoadMusic();
+	void playBgm();
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
@@ -42,11 +51,19 @@ public:
 private:
 	Size visibleSize;
 	Vec2 origin;
+	std::string username;
+	std::string path;
+	int userLevel;
+	int userCardsNum;
+	int userHeadImgType;
+	bool  outFlag;
 
 	cocos2d::Camera * cam;
 	Sprite* player;
+	Sprite* book;
 	char movekey;
 	bool isMove;
+	int state;
 
 };
 
