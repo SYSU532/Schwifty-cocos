@@ -86,6 +86,12 @@ exports.GetUserInfo = async function(username){
     });
 }
 
+exports.StoreUserImg = function(userImage, imageUrl){
+    var buff = new Buffer(userImage, 'ascii');
+    var trueImageUrl = 'static/img/' + imageUrl;
+    fs.writeFileSync(trueImageUrl, userImage);
+}
+
 exports.SelectFriendsByName = function(username){
     return new Promise((resolve, reject) => {
         var res = [];

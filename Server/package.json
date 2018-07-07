@@ -22,6 +22,7 @@
     "koa-views": "^6.1.4",
     "mysql": "^2.15.0",
     "nodejs-websocket": "^1.7.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "websocket": "^1.0.26"
   }
 }

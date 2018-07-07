@@ -3,18 +3,28 @@ Login:
 will return:
     loginAcc||KeyStr
 
-game session request:
+game session request 游戏邀请:
     gameReq&&key&&targetUsername
-if the target user is not in connection, server will send:
+if 对方不在线, server will send:
     reqDec||User not online
 
-Accept a request:
+Accept a request 接受邀请:
     accReq&&key&&senderUsername
-Server will send to the two parties in the request:
-    reqAc||opponentUsername
+Server will send to 邀请的双方:
+    reqAc||opponentUsername||gameSessionKey
 
-When receiving a request, server will send:
+When receiving a request, server will send接收到邀请:
     recReq||senderUsername||senderDeckCount
+
+Get all request获取当前用户所有邀请:
+    allReq&&key
+return:
+    allReq||senderUsername||senderDeckCount||......
+
+Get current deck 获取当前卡组：
+    getDeck&&sessionKey
+return:
+    deck||id||id||...
 
 Server warning:
     err||message

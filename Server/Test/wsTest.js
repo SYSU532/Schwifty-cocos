@@ -3,6 +3,7 @@
  *
  */
 
+
 function makec() {
     ws = new WebSocket('ws:/localhost:17700');
     ws.onmessage = function (evt) {
@@ -10,13 +11,13 @@ function makec() {
     };
     return ws;
 }
-ws = new WebSocket('ws:/localhost:17700');
+ws = new WebSocket('ws://localhost:17700');
 ws.onmessage = function (evt) {
-    console.log("Received Message: " + evt.data);
+    console.log("lalala Received Message: " + evt.data);
 };
-mm = new WebSocket('ws:/localhost:17700');
+mm = new WebSocket('ws://localhost:17700');
 mm.onmessage = function (evt) {
-    console.log("Received Message: " + evt.data);
+    console.log("palette Received Message: " + evt.data);
 };
 
 ws.send('login&&lalala&&121212');

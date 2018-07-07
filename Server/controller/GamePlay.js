@@ -149,14 +149,25 @@ class GameSession {
 
     playCard(username, cardIndex) {
         if (this.currentPlayer === this.UserOne && this.UserOne === username) {
+            if (this.deckOne.indexOf(cardIndex) === -1) {
+                return {status: false, msg: 'Player does not have the card.'}
+            }
             this.ground1.addCard(cardIndex);
             this.currentPlayer = this.UserTwo;
+            this.deckOne.splice(this.deckOne.indexOf(cardIndex), 1);
+            return {status: true};
         }
-        else if (this.currentPlayer === this.UserTwo || this.UserTwo === username) {
+        else if (this.currentPlayer === this.UserTwo && this.UserTwo === username) {
+            if (this.deckTwo.indexOf(cardIndex) === -1) {
+                return {status: false, msg: 'Player does not have the card.'}
+            }
             this.ground2.addCard(cardIndex);
-            this.currentPlayer = this.UserOne
+            this.currentPlayer = this.UserOne;
+            this.deckTwo.splice(this.deckTwo.indexOf(cardIndex), 1);
+            return {status: true};
         }
         else console.log(`Unexpected Card Play: ${this.currentPlayer}, ${this.UserOne}, ${this.UserTwo}`);
+        return {status: false, msg: 'Wrong player'};
     }
 
 }
