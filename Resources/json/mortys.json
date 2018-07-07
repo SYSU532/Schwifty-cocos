@@ -1,0 +1,218 @@
+[
+    {
+        "attack": 5,
+        "type": "normal",
+        "id": 0,
+        "name": "Morty"
+    },
+    {
+        "attack": 5,
+        "type": "normal",
+        "id": 1,
+        "name": "AdSpaceMorty"
+    },
+    {
+        "attack": 5,
+        "type": "normal",
+        "id": 2,
+        "name": "BigHeadMorty"
+    },
+    {
+        "attack": 6,
+        "type": "normal",
+        "id": 3,
+        "name": "BlueShirtMorty"
+    },
+    {
+        "attack": 7,
+        "type": "normal",
+        "id": 4,
+        "name": "DoubleMorty"
+    },
+    {
+        "attack": 7,
+        "type": "normal",
+        "id": 5,
+        "name": "ExoAlphaMorty"
+    },
+    {
+        "attack": 7,
+        "type": "normal",
+        "id": 6,
+        "name": "MoonMorty"
+    },
+    {
+        "attack": 6,
+        "type": "normal",
+        "id": 7,
+        "name": "MustacheMorty"
+    },
+    {
+        "attack": 7,
+        "type": "normal",
+        "id": 8,
+        "name": "NoEyeMorty"
+    },
+    {
+        "attack": 6,
+        "type": "normal",
+        "id": 9,
+        "name": "OldMorty"
+    },
+    {
+        "attack": 6,
+        "type": "normal",
+        "id": 10,
+        "name": "PeaceMorty"
+    },
+    {
+        "attack": 5,
+        "type": "normal",
+        "id": 11,
+        "name": "PizzaMorty"
+    },
+    {
+        "attack": 6,
+        "type": "normal",
+        "id": 12,
+        "name": "PoorlyClonedMorty"
+    },
+    {
+        "attack": 5,
+        "type": "normal",
+        "id": 13,
+        "name": "RabbitMorty"
+    },
+    {
+        "attack": 5,
+        "type": "normal",
+        "id": 14,
+        "name": "ScruffyMorty"
+    },
+    {
+        "attack": 6,
+        "type": "normal",
+        "id": 15,
+        "name": "SelfDefenseMorty"
+    },
+    {
+        "attack": 7,
+        "type": "normal",
+        "id": 16,
+        "name": "SpookyMorty"
+    },
+    {
+        "attack": 6,
+        "type": "normal",
+        "id": 17,
+        "name": "StrawberryMorty"
+    },
+    {
+        "attack": 5,
+        "type": "normal",
+        "id": 18,
+        "name": "TestX1Morty"
+    },
+    {
+        "attack": 6,
+        "type": "normal",
+        "id": 19,
+        "name": "VeinyMorty"
+    },
+    {
+        "attack": 12,
+        "type": "epic",
+        "id": 20,
+        "name": "AndroidMorty"
+    },
+    {
+        "attack": 11,
+        "type": "epic",
+        "id": 21,
+        "name": "ArmomalyMorty"
+    },
+    {
+        "attack": 10,
+        "type": "epic",
+        "id": 22,
+        "name": "BlockyMorty"
+    },
+    {
+        "attack": 10,
+        "type": "epic",
+        "id": 23,
+        "name": "ButtFaceMorty"
+    },
+    {
+        "attack": 10,
+        "type": "epic",
+        "id": 24,
+        "name": "LooRollMorty"
+    },
+    {
+        "attack": 10,
+        "type": "epic",
+        "id": 25,
+        "name": "PickleMorty"
+    },
+    {
+        "attack": 12,
+        "type": "epic",
+        "id": 26,
+        "name": "RoninMorty"
+    },
+    {
+        "attack": 11,
+        "type": "epic",
+        "id": 27,
+        "name": "SnowmanMorty"
+    },
+    {
+        "attack": 11,
+        "type": "epic",
+        "id": 28,
+        "name": "StoolMorty"
+    },
+    {
+        "attack": 12,
+        "type": "epic",
+        "id": 29,
+        "name": "WonderMorty"
+    },
+    {
+        "attack": 17,
+        "type": "exotic",
+        "id": 30,
+        "name": "BlackHoleMorty"
+    },
+    {
+        "attack": 16,
+        "type": "exotic",
+        "id": 31,
+        "name": "BoulderMorty"
+    },
+    {
+        "attack": 16,
+        "type": "exotic",
+        "id": 32,
+        "name": "GaseousMorty"
+    },
+    {
+        "attack": 15,
+        "type": "exotic",
+        "id": 33,
+        "name": "ShadowMorty"
+    },
+    {
+        "attack": 16,
+        "type": "exotic",
+        "id": 34,
+        "name": "SkeletonMorty"
+    },
+    {
+        "attack": 25,
+        "type": "exotic",
+        "id": 35,
+        "name": "TheOneTrueMorty"
+    }
+]
