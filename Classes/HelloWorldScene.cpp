@@ -141,6 +141,9 @@ void HelloWorld::networkUpdate(float f) {
 				}
 			}
 		}
+		else if (res.size() == 2 && res[0] == "userLogOut") {
+			deleteUser(res[1]);
+		}
 		else {
 			auto sign = res[0];
 			int size = res.size();
@@ -174,6 +177,19 @@ void HelloWorld::addNewUser(string username, int rickType, Vec2 initLoc) {
 	newUser->addChild(requestLabel, 1);
 	this->addChild(newUser);
 	otherPlayers.push_back(pair<string, Sprite*>(username, newUser));
+}
+
+void HelloWorld::deleteUser(string username) {
+	auto root = Director::getInstance()->getRunningScene();
+	auto sceneTarget = (Sprite*)root->getChildByName(username);
+	sceneTarget->removeFromParentAndCleanup(true);
+	vector<pair<string, Sprite*> >::iterator it = otherPlayers.begin();
+	for (; it != otherPlayers.end(); it++) {
+		if ((*it).first == username) {
+			otherPlayers.erase(it);
+			break;
+		}
+	}
 }
 
 void HelloWorld::preLoadMusic() {

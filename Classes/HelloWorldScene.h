@@ -31,6 +31,7 @@ public:
 	void initAllUsers();
 
 	void addNewUser(string username, int rickType, Vec2 initLoc);
+	void deleteUser(string username);
 
 	// Touch Functions
 	void onTouchMoved(Touch* touch, Event* event);
