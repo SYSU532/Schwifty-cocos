@@ -420,11 +420,15 @@ wsServer.on('request', function(request){
     });
 
     conn.on('close', async function(code, reason){
-        console.log("Close: " + conn.user);
-        delete connections[conn.id];
-        delete userLocations[conn.user];
-        for (let key in connections) {
-            connections[key].sendUTF('userLogOut||' + conn.user);
+        if (conn.id) {
+            delete connections[conn.id];
+        }
+        if (conn.user) {
+            console.log("Close: " + conn.user);
+            delete userLocations[conn.user];
+            for (let key in connections) {
+                connections[key].sendUTF('userLogOut||' + conn.user);
+            }
         }
     });
 
