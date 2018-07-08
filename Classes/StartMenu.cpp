@@ -116,7 +116,8 @@ void StartMenu::onLogupAdmit(Node* pNode) {
 	auto password = UserDefault::getInstance()->getStringForKey("password");
 	auto email = UserDefault::getInstance()->getStringForKey("email");
 	HttpRequest* request = new HttpRequest();
-	auto phone = random() * 1000;
+    srand(time(NULL));
+	auto phone = rand() * 1000;
 	std::string postData = "name=" + username + "&pass=" + password
 		+ "&email=" + email + "&imgType=.jpg" + "&phone=" + Value(phone).asString() + "&default=1&rePass=" + password;
 	request->setUrl("https://esblog.chenmt.science/logup?" + postData);
