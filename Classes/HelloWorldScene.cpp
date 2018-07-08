@@ -109,7 +109,8 @@ void HelloWorld::networkUpdate(float f) {
 							path = "characters/" + Value(rickType).asString() + "/Rick4.png";
 						}
 					}
-					targetUser->getSpriteFrame()->setTexture(Director::getInstance()->getTextureCache()->addImage(path));
+					SpriteFrame *frame = SpriteFrameCache::getInstance()->getSpriteFrameByName(path);
+					targetUser->setSpriteFrame(frame);
 					targetUser->setPosition(Vec2(x, y));
 				}
 			}
