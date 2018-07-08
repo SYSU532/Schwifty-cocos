@@ -101,6 +101,7 @@ void HelloWorld::networkUpdate(float f) {
 void HelloWorld::addNewUser(string username, int rickType, Vec2 initLoc) {
 	string path = "characters/" + Value(rickType).asString() + "/Rick4.png";
 	auto newUser = Sprite::create(path);
+	newUser->setScale(0.3);
 	newUser->setPosition(initLoc);
 	newUser->setName(username);
 	this->addChild(newUser);
@@ -182,14 +183,14 @@ void HelloWorld::move(char dir) {
 	}
 
 	auto dest = offset + player->getPosition();
-	if (dest.x < 0)
-		dest.x = 0;
-	else if (dest.x > visibleSize.width)
-		dest.x = visibleSize.width;
-	if (dest.y < 0)
-		dest.y = 0;
-	else if (dest.y > visibleSize.height)
-		dest.y = visibleSize.height;
+	if (dest.x < 55)
+		dest.x = 60;
+	else if (dest.x > visibleSize.width + 30)
+		dest.x = visibleSize.width + 30;
+	if (dest.y < 20)
+		dest.y = 20;
+	else if (dest.y > visibleSize.height - 20)
+		dest.y = visibleSize.height - 20;
 		
 	auto move = MoveTo::create(0.1f, dest);
 	auto animation = Animation::createWithSpriteFrames(Move, 0.2f);
