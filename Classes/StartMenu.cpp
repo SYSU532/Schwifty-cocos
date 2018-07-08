@@ -13,18 +13,9 @@ Scene* StartMenu::createScene()
 	return StartMenu::create();
 }
 
-// Print useful error message instead of segfaulting when files are not there.
-static void problemLoading(const char* filename)
-{
-	printf("Error while loading: %s\n", filename);
-	printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
-}
-
-// on "init" you need to initialize your instance
 bool StartMenu::init()
 {
-	//////////////////////////////
-	// 1. super init first
+	
 	if (!Scene::init())
 	{
 		return false;
@@ -32,11 +23,6 @@ bool StartMenu::init()
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
-	/////////////////////////////
-	// 2. add a menu item with "X" image, which is clicked to quit the program
-	//    you may modify it.
-
-	// add a "close" icon to exit the progress. it's an autorelease object
 
 	auto bg = Sprite::create("bgg.jpg");
 	bg->setPosition(visibleSize / 2);
@@ -59,8 +45,14 @@ bool StartMenu::init()
 	auto menu = Menu::create(LoginBtn, LogupBtn, NULL);
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 1);
-	
+
+	schedule(schedule_selector(StartMenu::LogUpdate), 0.05f, kRepeatForever, 0);
+
+	nowMsg = "";
+
 	playBgm();
+
+	
 
 	return true;
 }
@@ -75,42 +67,39 @@ void StartMenu::signin(Ref* p) {
 	this->addChild(d1, 1);
 }
 
-void StartMenu::onLoginAdmit(Node* pNode) {
-	auto username = UserDefault::getInstance()->getStringForKey("username");
-	auto password = UserDefault::getInstance()->getStringForKey("password");
-	HttpRequest* request = new HttpRequest();
-	request->setUrl("https://esblog.chenmt.science/login");
-	request->setRequestType(HttpRequest::Type::POST);
-	request->setResponseCallback(CC_CALLBACK_2(StartMenu::onLoginResponse, this));
-	
-	std::string postData = "name=" + username + "&pass=" + password;
-	CCLOG(postData.c_str());
-	request->setRequestData(postData.c_str(), postData.length());
-	HttpClient::getInstance()->send(request);
-	request->release();
-}
-
-void StartMenu::onLoginResponse(HttpClient* sender, HttpResponse* res) {
-	if (res) {
-		if (res->isSucceed()) {
-			rapidjson::Document doc;
-			auto buff = res->getResponseData();
-			doc.Parse(buff->data(), buff->size());
-			auto msg = doc["errMessage"].GetString();
-			auto code = doc["code"].GetInt();
-			auto root = Director::getInstance()->getRunningScene();
+void StartMenu::LogUpdate(float f) {
+	string newMsg = access0.getMessage();
+	auto root = Director::getInstance()->getRunningScene();
+	if (nowMsg != newMsg) {
+		nowMsg = newMsg;
+		auto spRes = access0.split(nowMsg, "||");
+		if (spRes.size() == 2) {
+			auto res = access0.ParseLogin(nowMsg);
+			auto code = res.first;
+			auto msg = res.second;
 			MyDialog* dd = (MyDialog*)root->getChildByName("Dialog");
-			if (code == 0) {
+			if (dd == NULL) {
+				dd = (MyDialog*)root->getChildByName("RDialog");
+				if (dd == NULL)
+					return;
+			}
+			if (code == false) {
 				dd->changeMsg(msg, 0);
 			}
 			else {
 				dd->changeMsg("OK", 1);
+				UserDefault::getInstance()->setStringForKey("userkey", msg);
 				dd->removeFromParentAndCleanup(true);
-				
 				pickRick();
 			}
 		}
 	}
+}
+
+void StartMenu::onLoginAdmit(Node* pNode) {
+	auto username = UserDefault::getInstance()->getStringForKey("username");
+	auto password = UserDefault::getInstance()->getStringForKey("password");
+	access0.AttemptLogin(username, password);
 }
 
 void StartMenu::signup(Ref* p) {
@@ -127,8 +116,9 @@ void StartMenu::onLogupAdmit(Node* pNode) {
 	auto password = UserDefault::getInstance()->getStringForKey("password");
 	auto email = UserDefault::getInstance()->getStringForKey("email");
 	HttpRequest* request = new HttpRequest();
+	auto phone = random() * 1000;
 	std::string postData = "name=" + username + "&pass=" + password
-		+ "&email=" + email + "&imgType=.jpg" + "&phone=&default=1&rePass=" + password;
+		+ "&email=" + email + "&imgType=.jpg" + "&phone=" + Value(phone).asString() + "&default=1&rePass=" + password;
 	request->setUrl("https://esblog.chenmt.science/logup?" + postData);
 	request->setRequestType(HttpRequest::Type::POST);
 	request->setResponseCallback(CC_CALLBACK_2(StartMenu::onLogupResponse, this));
@@ -164,9 +154,10 @@ void StartMenu::onLogupResponse(HttpClient* sender, HttpResponse* res) {
 				dd->changeMsg(m, 0);
 			}
 			else {
-				dd->changeMsg("OK", 1);
+				auto username = UserDefault::getInstance()->getStringForKey("username");
+				auto password = UserDefault::getInstance()->getStringForKey("password");
+				access0.AttemptLogin(username, password);
 				dd->removeFromParentAndCleanup(true);
-				
 				pickRick();
 			}
 		}

@@ -1,4 +1,5 @@
 #include "HelloWorldScene.h"
+#include "NetWorkAccess.h"
 #include "SimpleAudioEngine.h"
 #include "CardScene.h"
 
@@ -10,18 +11,10 @@ Scene* HelloWorld::createScene()
     return HelloWorld::create();
 }
 
-// Print useful error message instead of segfaulting when files are not there.
-static void problemLoading(const char* filename)
-{
-    printf("Error while loading: %s\n", filename);
-    printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
-}
-
 // on "init" you need to initialize your instance
 bool HelloWorld::init()
 {
-    //////////////////////////////
-    // 1. super init first
+    
     if ( !Scene::init() )
     {
         return false;
@@ -32,8 +25,9 @@ bool HelloWorld::init()
 	origin = Director::getInstance()->getVisibleOrigin();
     
 	username = UserDefault::getInstance()->getStringForKey("username");
+	userKey = UserDefault::getInstance()->getStringForKey("userkey");
 	std::string head = username + "_head";
-	auto userRick = UserDefault::getInstance()->getIntegerForKey(head.c_str()) - 1;
+	userRick = UserDefault::getInstance()->getIntegerForKey(head.c_str()) - 1;
 	std::string headPath = "characters/" + Value(userRick).asString() + "/Rick4.png";
 	path = "characters/" + Value(userRick).asString();
 
@@ -44,15 +38,10 @@ bool HelloWorld::init()
 	placeTileMap();
 
 	book = Sprite::create("book.png");
-	book->setPosition(Vec2(visibleSize.width  - 110, visibleSize.height + 20));
+	book->setPosition(Vec2(visibleSize.width  - 120, visibleSize.height + 20));
 	book->setScale(0.35);
 	this->addChild(book, 1);
 
-	auto winSize = Director::sharedDirector()->getWinSize();
-	cam = Camera::createPerspective(60.0, (float)winSize.width / winSize.height, 1, 1000);
-	cam->setRotation3D(Vec3(-45, 0, 0));
-	this->addChild(cam);
-	
 	initUserInfo();
 
 	addTouchListener();
@@ -63,7 +52,9 @@ bool HelloWorld::init()
 	playBgm();
 
 	schedule(schedule_selector(HelloWorld::update), 0.05f, kRepeatForever, 0);
+	schedule(schedule_selector(HelloWorld::networkUpdate), 0.01f, kRepeatForever, 0);
 
+	nowMsg = "";
 	state = 0;
 	outFlag = false;
 
@@ -75,7 +66,15 @@ void HelloWorld::update(float f) {
 		move(movekey);
 
 	}
-	cam->setPosition3D(player->getPosition3D());
+
+}
+
+void HelloWorld::networkUpdate(float f) {
+	string newMsg = access0.getMessage();
+	if (nowMsg != newMsg) {
+		nowMsg = newMsg;
+		// Handle New Message
+	}
 
 }
 
@@ -94,9 +93,7 @@ void HelloWorld::playBgm() {
 
 void HelloWorld::initUserInfo() {
 	username = UserDefault::getInstance()->getStringForKey("username");
-	userLevel = 10;
 	userCardsNum = 13;
-	userHeadImgType = 0;
 	std::string headPath = path + "/head.png";
 
 	auto userHead = Sprite::create(headPath);
@@ -173,6 +170,7 @@ void HelloWorld::move(char dir) {
 	auto repeat = Repeat::create(animate, 1);
 	player->runAction(repeat);
 	player->runAction(move);
+	access0.UpdateUserLocation(userKey, userRick, player->getPosition().x, player->getPosition().y);
 }
 
 void HelloWorld::placeTileMap() {
@@ -223,9 +221,7 @@ void HelloWorld::onMouseMoved(Event* e) {
 	}
 }
 
-void HelloWorld::onTouchMoved(Touch* touchs, Event* event) {
-	
-}
+void HelloWorld::onTouchMoved(Touch* touchs, Event* event) {}
 
 bool HelloWorld::onTouchBegin(Touch* touch, Event* event) {
 	return true;
@@ -283,20 +279,3 @@ void HelloWorld::onKeyReleased(EventKeyboard::KeyCode code, Event* event) {
 	}
 }
 
-
-void HelloWorld::menuCloseCallback(Ref* pSender)
-{
-    //Close the cocos2d-x game scene and quit the application
-    Director::getInstance()->end();
-
-    #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    exit(0);
-#endif
-
-    /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() and exit(0) as given above,instead trigger a custom event created in RootViewController.mm as below*/
-
-    //EventCustom customEndEvent("game_scene_close_event");
-    //_eventDispatcher->dispatchEvent(&customEndEvent);
-
-
-}

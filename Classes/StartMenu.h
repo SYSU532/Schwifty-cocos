@@ -3,12 +3,14 @@
 #define __START__MENU__H__
 
 #include "cocos2d.h"
+#include "NetWorkAccess.h"
 #include "network\HttpClient.h"
 #include "json\rapidjson.h"
 #include "json\document.h"
 
 using namespace cocos2d;
 using namespace cocos2d::network;
+using namespace std;
 
 class StartMenu : public Scene {
 public:
@@ -20,9 +22,11 @@ public:
 	void signin(Ref* pSender);
 	void signup(Ref* pSender);
 
+	// Listen to Login Response
+	void LogUpdate(float f);
+
 	// Http Acess
 	void onLoginAdmit(Node* pNode);
-	void onLoginResponse(HttpClient* sender, HttpResponse* res);
 	void onLogupAdmit(Node* pNode);
 	void onLogupResponse(HttpClient* sender, HttpResponse* res);
 
@@ -35,6 +39,8 @@ public:
 	CREATE_FUNC(StartMenu);
 
 private:
+	string nowMsg;
+	string userKey;
 
 };
 

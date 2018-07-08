@@ -2,8 +2,11 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
+#include <vector>
 
 using namespace cocos2d;
+using namespace std;
+
 class HelloWorld : public cocos2d::Scene
 {
 public:
@@ -13,16 +16,13 @@ public:
 
 	void placeTileMap();
     
-    // a selector callback
-    void menuCloseCallback(cocos2d::Ref* pSender);
-
-	void menuClickCallback(cocos2d::Ref* pSender);
-
 	// Basic Role Behaviors
 	void attack();
 	void move(char c);
 
 	void update(float f);
+	void networkUpdate(float f);
+
 	void initUserInfo();
 
 	// Touch Functions
@@ -49,22 +49,30 @@ public:
     CREATE_FUNC(HelloWorld);
 
 private:
+	// Window Basic Properties
 	Size visibleSize;
 	Vec2 origin;
+
+	// User Infos
 	std::string username;
 	std::string path;
-	int userLevel;
 	int userCardsNum;
-	int userHeadImgType;
-	bool  outFlag;
-
-	cocos2d::Camera * cam;
-	Sprite* player;
-	Sprite* book;
+	string userKey;
+	int userRick;
 	char movekey;
 	bool isMove;
 	int state;
 
+	// Scene elements
+	bool outFlag;
+	Sprite* player;
+	Sprite* book;
+	
+	// WebSocket Messages register
+	string msgType;
+	string nowMsg;
+	vector<string> splitMsg;
+
 };
 
-#endif // __HELLOWORLD_SCENE_H__
+#endif 
