@@ -3,8 +3,8 @@
 #define __NETWORK__ACCESS__H__
 
 #include "cocos2d.h"
-#include "network\HttpClient.h"
-#include "network//WebSocket.h"
+#include "network/HttpClient.h"
+#include "network/WebSocket.h"
 #include <iostream>
 #include <cstring>
 #include <vector>

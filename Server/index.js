@@ -141,9 +141,12 @@ wsServer.on('request', function(request){
                     conn.user = instructions[1];
                     var connectionID = getStringMD5(instructions[1]);
                     conn.id = connectionID;
-                    conn.sendUTF(connectionID);
+                    conn.sendUTF('login||' + connectionID);
                     connections[connectionID] = conn;
                     console.log('Created ws: ' + connectionID);
+                }
+                else {
+                    conn.sendUTF('err||Invalid login info!');
                 }
                 break;
             //gameReq&&key&&targetUsername
