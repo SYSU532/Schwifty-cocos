@@ -76,5 +76,8 @@ Get all User Locations获取所有用户位置:
 return:
     locs||username1||rick1||x1||y1||user2||rick2||x2||y2||...
 
+User Close connection用户离线，其他用户收到：
+    userLogOut||username
+
 Server warning:
     err||message

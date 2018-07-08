@@ -422,6 +422,10 @@ wsServer.on('request', function(request){
     conn.on('close', async function(code, reason){
         console.log("Close: " + conn.user);
         delete connections[conn.id];
+        delete userLocations[conn.user];
+        for (let key in connections) {
+            connections[key].sendUTF('userLogOut||' + conn.user);
+        }
     });
 
     conn.on('error', async function(code, reason){
