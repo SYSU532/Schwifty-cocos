@@ -52,7 +52,7 @@ bool HelloWorld::init()
 	playBgm();
 
 	schedule(schedule_selector(HelloWorld::update), 0.05f, kRepeatForever, 0);
-	schedule(schedule_selector(HelloWorld::networkUpdate), 0.01f, kRepeatForever, 0);
+	schedule(schedule_selector(HelloWorld::networkUpdate), 0.02f, kRepeatForever, 0);
 
 	nowMsg = "";
 	state = 0;
@@ -71,11 +71,32 @@ void HelloWorld::update(float f) {
 
 void HelloWorld::networkUpdate(float f) {
 	string newMsg = access0.getMessage();
+	auto root = Director::getInstance()->getRunningScene();
 	if (nowMsg != newMsg) {
 		nowMsg = newMsg;
-		// Handle New Message
+		auto res = access0.split(nowMsg, "||");
+		if (res.size() == 5) {
+			auto sign = res[0], usrname = res[1];
+			int rickType = Value(res[2]).asInt();
+			float x = Value(res[3]).asFloat(), y = Value(res[4]).asFloat();
+			if (sign == "newUser" && usrname != username) {
+				addNewUser(usrname, rickType, Vec2(x, y));
+			}
+			else if (sign == "newLoc" && usrname != username) {
+				auto targetUser = (Sprite*)root->getChildByName(usrname);
+				targetUser->setPosition(Vec2(x, y));
+			}
+		}
 	}
 
+}
+
+void HelloWorld::addNewUser(string username, int rickType, Vec2 initLoc) {
+	string path = "characters/" + Value(rickType).asString() + "/Rick4.png";
+	auto newUser = Sprite::create(path);
+	newUser->setPosition(initLoc);
+	newUser->setName(username);
+	this->addChild(newUser);
 }
 
 void HelloWorld::preLoadMusic() {

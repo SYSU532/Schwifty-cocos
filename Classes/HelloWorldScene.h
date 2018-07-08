@@ -25,6 +25,8 @@ public:
 
 	void initUserInfo();
 
+	void addNewUser(string username, int rickType, Vec2 initLoc);
+
 	// Touch Functions
 	void onTouchMoved(Touch* touch, Event* event);
 	bool onTouchBegin(Touch* touch, Event* event);
