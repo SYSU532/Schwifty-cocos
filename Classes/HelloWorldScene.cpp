@@ -86,6 +86,9 @@ void HelloWorld::networkUpdate(float f) {
 				auto targetUser = (Sprite*)root->getChildByName(usrname);
 				if (targetUser == NULL) {
 					addNewUser(usrname, rickType, Vec2(x, y));
+					
+				}
+				else {
 					targetUser = (Sprite*)root->getChildByName(usrname);
 					targetUser->setPosition(Vec2(x, y));
 				}
