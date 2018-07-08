@@ -43,6 +43,7 @@ bool HelloWorld::init()
 	this->addChild(book, 1);
 
 	initUserInfo();
+	initAllUsers();
 
 	addTouchListener();
 	addMouseListener();
@@ -58,15 +59,24 @@ bool HelloWorld::init()
 	state = 0;
 	outFlag = false;
 
+	auto requestLabel = Label::createWithTTF(username, "fonts/Marker Felt.ttf", 50);
+	requestLabel->setPosition(Vec2(70, 160));
+	requestLabel->setColor(Color3B::ORANGE);
+	player->addChild(requestLabel, 1);
+
     return true;
 }
 
 void HelloWorld::update(float f) {
+	showRequestIcon();
 	if (isMove) {
 		move(movekey);
-
 	}
 
+}
+
+void HelloWorld::initAllUsers() {
+	access0.GetAllUserLocation();
 }
 
 void HelloWorld::networkUpdate(float f) {
@@ -75,7 +85,7 @@ void HelloWorld::networkUpdate(float f) {
 	if (nowMsg != newMsg) {
 		nowMsg = newMsg;
 		auto res = access0.split(nowMsg, "||");
-		if (res.size() == 5) {
+		if (res.size() == 5 && res[0] != "locs") {
 			auto sign = res[0], usrname = res[1];
 			int rickType = Value(res[2]).asInt();
 			float x = Value(res[3]).asFloat(), y = Value(res[4]).asFloat();
@@ -131,6 +141,20 @@ void HelloWorld::networkUpdate(float f) {
 				}
 			}
 		}
+		else {
+			auto sign = res[0];
+			int size = res.size();
+			if (sign == "locs") {
+				for (int i = 1; i < res.size(); i += 4) {
+					string usrname = res[i];
+					if (usrname != username) {
+						int rickType = Value(res[i + 1]).asInt();
+						Vec2 pos = Vec2(Value(res[i + 2]).asFloat(), Value(res[i + 3]).asFloat());
+						addNewUser(usrname, rickType, pos);
+					}
+				}
+			}
+		}
 	}
 
 }
@@ -144,14 +168,17 @@ void HelloWorld::addNewUser(string username, int rickType, Vec2 initLoc) {
 	UserDefault::getInstance()->setIntegerForKey(storeState.c_str(), 0);
 	newUser->setPosition(initLoc);
 	newUser->setName(username);
+	auto requestLabel = Label::createWithTTF(username, "fonts/Marker Felt.ttf", 50);
+	requestLabel->setPosition(Vec2(70, 160));
+	requestLabel->setColor(Color3B::ORANGE);
+	newUser->addChild(requestLabel, 1);
 	this->addChild(newUser);
+	otherPlayers.push_back(pair<string, Sprite*>(username, newUser));
 }
 
 void HelloWorld::preLoadMusic() {
 	auto audio = SimpleAudioEngine::getInstance();
 	audio->preloadBackgroundMusic("music/jazz.mp3");
-	
-
 }
 
 void HelloWorld::playBgm() {
@@ -177,12 +204,93 @@ void HelloWorld::initUserInfo() {
 	this->addChild(userHead, 1);
 }
 
-void HelloWorld::attack() {
-	Scene* s = CardScene::createScene();
-	auto animate = TransitionFade::create(1.5f, s);
-	CCDirector::sharedDirector()->replaceScene(animate);
-	auto audio = SimpleAudioEngine::getInstance();
-	audio->stopBackgroundMusic();
+void HelloWorld::sendGameRequest() {
+	Rect playerRect = player->getBoundingBox();
+	Rect requestRect;
+	switch (movekey) {
+	case 'W':
+		requestRect = Rect(playerRect.getMinX(), playerRect.getMinY(),
+			playerRect.getMaxX() - playerRect.getMinX(), playerRect.getMaxY() + 30 - playerRect.getMinY());
+		break;
+	case 'A':
+		requestRect = Rect(playerRect.getMinX() - 30, playerRect.getMinY(),
+			playerRect.getMaxX() + 30 - playerRect.getMinX(), playerRect.getMaxY() - playerRect.getMinY());
+		break;
+	case 'S':
+		requestRect = Rect(playerRect.getMinX(), playerRect.getMinY() - 30,
+			playerRect.getMaxX() - playerRect.getMinX(), playerRect.getMaxY() + 30 - playerRect.getMinY());
+		break;
+	case 'D':
+		requestRect = Rect(playerRect.getMinX(), playerRect.getMinY(),
+			playerRect.getMaxX() + 30 - playerRect.getMinX(), playerRect.getMaxY() - playerRect.getMinY());
+		break;
+	};
+	for (auto e : otherPlayers) {
+		auto name = e.first;
+		auto other = e.second;
+		if (requestRect.containsPoint(other->getPosition())) {
+			MyDialog* dd = MyDialog::create();
+			dd->chooseMode(2);
+			dd->setTitle("Invitation Confirm");
+			this->addChild(dd, 1);
+			dd->changeMsg("Do you want to invite " + name + "\nto start playing Schwifty Cards?", true);
+			return;
+		}
+	}
+}
+
+void HelloWorld::showRequestIcon() {
+	Rect playerRect = player->getBoundingBox();
+	Rect requestRect;
+	switch (movekey) {
+	case 'W':
+		requestRect = Rect(playerRect.getMinX(), playerRect.getMinY(),
+			playerRect.getMaxX() - playerRect.getMinX(), playerRect.getMaxY() + 30 - playerRect.getMinY());
+		break;
+	case 'A':
+		requestRect = Rect(playerRect.getMinX() - 30, playerRect.getMinY(),
+			playerRect.getMaxX() + 30 - playerRect.getMinX(), playerRect.getMaxY() - playerRect.getMinY());
+		break;
+	case 'S':
+		requestRect = Rect(playerRect.getMinX(), playerRect.getMinY() - 30,
+			playerRect.getMaxX() - playerRect.getMinX(), playerRect.getMaxY() + 30 - playerRect.getMinY());
+		break;
+	case 'D':
+		requestRect = Rect(playerRect.getMinX(), playerRect.getMinY(),
+			playerRect.getMaxX() + 30 - playerRect.getMinX(), playerRect.getMaxY() - playerRect.getMinY());
+		break;
+	};
+	for (auto e : otherPlayers) {
+		string name = e.first;
+		Sprite* other = e.second;
+		if (requestRect.containsPoint(other->getPosition())) {
+			if (other->getChildByName("space") != NULL)
+				return;
+			auto space = Sprite::create("space0.png");
+			space->setScale(0.65);
+			Vector<SpriteFrame*> blink;
+			blink.reserve(2);
+			for (int i = 0; i < 2; i++) {
+				string path = "space" + Value(1 - i).asString() + ".png";
+				auto frame = SpriteFrame::create(path, Rect(0, 0, 434, 317));
+				blink.pushBack(frame);
+			}
+			auto animation = Animation::createWithSpriteFrames(blink, 0.5f);
+			auto animate = Animate::create(animation);
+			space->setPosition(Vec2(60, 180));
+			space->runAction(RepeatForever::create(animate));
+			space->setName("space");
+			other->removeAllChildrenWithCleanup(true);
+			other->addChild(space, 1);
+		}
+		else {
+			other->removeAllChildrenWithCleanup(true);
+			auto requestLabel = Label::createWithTTF(name, "fonts/Marker Felt.ttf", 50);
+			requestLabel->setPosition(Vec2(70, 160));
+			requestLabel->setColor(Color3B::ORANGE);
+			other->addChild(requestLabel, 1);
+		}
+	}
 }
 
 void HelloWorld::move(char dir) {
@@ -323,7 +431,7 @@ void HelloWorld::onKeyPress(EventKeyboard::KeyCode code, Event* event) {
 		isMove = true;
 		break;
 	case EventKeyboard::KeyCode::KEY_SPACE:
-		attack();
+		sendGameRequest();
 		break;
 	}
 }

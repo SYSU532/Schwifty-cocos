@@ -2,6 +2,7 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
+#include "MyDialog.h"
 #include <vector>
 
 using namespace cocos2d;
@@ -17,13 +18,17 @@ public:
 	void placeTileMap();
     
 	// Basic Role Behaviors
-	void attack();
+	void sendGameRequest();
+	void receiveGameRequest();
+	void showRequestIcon();
+
 	void move(char c);
 
 	void update(float f);
 	void networkUpdate(float f);
 
 	void initUserInfo();
+	void initAllUsers();
 
 	void addNewUser(string username, int rickType, Vec2 initLoc);
 
@@ -68,6 +73,7 @@ private:
 	// Scene elements
 	bool outFlag;
 	Sprite* player;
+	vector<pair<string, Sprite*> > otherPlayers;
 	Sprite* book;
 	
 	// WebSocket Messages register

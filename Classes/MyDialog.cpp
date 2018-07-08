@@ -96,6 +96,7 @@ void MyDialog::chooseMode(int mode) {
 			labelArr.pushBack(emailInput);
 			break;
 		case 2:
+			setSpriteBackGround(Sprite::create("smallBoard.png"));
 			break;
 	}
 }
@@ -134,6 +135,9 @@ void MyDialog::onEnter() {
 		this->addChild(node, 1);
 		order_height -= 100;
 		j++;
+	}
+	if (labelArr.size() == 0) {
+		order_height = 150;
 	}
 	auto showRes = Label::createWithTTF("", "fonts/Marker Felt.ttf", 35);
 	showRes->setPosition(Point(winSize.width / 2, winSize.height - contentSize.height + order_height));

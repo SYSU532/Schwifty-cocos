@@ -8,32 +8,17 @@ Scene* CardScene::createScene()
 	return CardScene::create();
 }
 
-// Print useful error message instead of segfaulting when files are not there.
-static void problemLoading(const char* filename)
-{
-	printf("Error while loading: %s\n", filename);
-	printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
-}
 
-// on "init" you need to initialize your instance
 bool CardScene::init()
 {
-	//////////////////////////////
-	// 1. super init first
 	if (!Scene::init())
 	{
 		return false;
 	}
 
-	Director::getInstance()->getOpenGLView()->setFrameSize(1748, 1012);
+	Director::getInstance()->getOpenGLView()->setFrameSize(1400, 850);
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
-	
-	/////////////////////////////
-	// 2. add a menu item with "X" image, which is clicked to quit the program
-	//    you may modify it.
-
-	// add a "close" icon to exit the progress. it's an autorelease object
 	
 	auto bg = Sprite::create("board.png");
 	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height /2 + 20));
@@ -73,7 +58,7 @@ void CardScene::initCards() {
 	int borderWidth = 70;
 	int i = 0;
 	for (; it != cards.end(); it++) {
-		(*it)->setScale(0.18);
+		(*it)->setScale(0.17);
 		(*it)->setPosition(Vec2(borderWidth, 20));
 		(*it)->setTag(i);
 		this->addChild((*it), 1);
@@ -212,13 +197,13 @@ void CardScene::onMouseMoved(Event* e) {
 		if (sp->getPosition().getDistance(pos) <= 40) {
 			if (!outFlag[i]) {
 				outFlag[i] = true;
-				auto animate = ScaleTo::create(1.0f, 0.21f, 0.21f);
+				auto animate = ScaleTo::create(1.0f, 0.20f, 0.20f);
 				sp->runAction(animate);
 			}
 		}
 		else {
 			if (outFlag[i]) {
-				auto animate = ScaleTo::create(1.0f, 0.18f, 0.18f);
+				auto animate = ScaleTo::create(1.0f, 0.17f, 0.17f);
 				sp->runAction(animate);
 			}
 			outFlag[i] = false;
