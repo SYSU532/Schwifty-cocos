@@ -92,26 +92,42 @@ void HelloWorld::networkUpdate(float f) {
 					targetUser = (Sprite*)root->getChildByName(usrname);
 					auto loc = targetUser->getPosition();
 					auto rickType = UserDefault::getInstance()->getIntegerForKey(usrname.c_str());
-					string path; 
+					string path, statePath = usrname + "state";
+					auto dirc = 0;
+					auto storeState = UserDefault::getInstance()->getIntegerForKey(statePath.c_str());
 					if (loc.y != y) {
 						if (loc.y < y) {
-							path = "characters/" + Value(rickType).asString() + "/Rick8.png";
-						}
-						else if (loc.y > y){
-							path = "characters/" + Value(rickType).asString() + "/Rick0.png";
+							dirc = 8;
 						}
 					}
 					else if (loc.x != x) {
 						if (loc.x < x) {
-							path = "characters/" + Value(rickType).asString() + "/Rick12.png";
+							dirc = 12;
 						}
 						else if(loc.x > x){
-							path = "characters/" + Value(rickType).asString() + "/Rick4.png";
+							dirc = 4;
 						}
 					}
-					targetUser->setTexture(path);
-					auto moveTo = MoveTo::create(0.2f, Vec2(x, y));
-					targetUser->runAction(moveTo);
+					Vector<SpriteFrame*> Move;
+					Move.reserve(1);
+					char movePath[40];
+					path = "characters/" + Value(rickType).asString() + "/Rick%d.png";
+					sprintf(movePath, path.c_str(), dirc + storeState);
+					auto frame = SpriteFrame::create(movePath, Rect(0, 0, 125, 162));
+					Move.pushBack(frame);
+					if (storeState == 3) {
+						storeState = 0;
+					}
+					else {
+						storeState++;
+					}
+					UserDefault::getInstance()->setIntegerForKey(statePath.c_str(), storeState);
+					auto move = MoveTo::create(0.1f, Vec2(x, y));
+					auto animation = Animation::createWithSpriteFrames(Move, 0.2f);
+					auto animate = Animate::create(animation);
+					auto repeat = Repeat::create(animate, 1);
+					targetUser->runAction(repeat);
+					targetUser->runAction(move);
 				}
 			}
 		}
@@ -123,7 +139,9 @@ void HelloWorld::addNewUser(string username, int rickType, Vec2 initLoc) {
 	string path = "characters/" + Value(rickType).asString() + "/Rick4.png";
 	auto newUser = Sprite::create(path);
 	newUser->setScale(0.3);
+	string storeState = username + "state";
 	UserDefault::getInstance()->setIntegerForKey(username.c_str(), rickType);
+	UserDefault::getInstance()->setIntegerForKey(storeState.c_str(), 0);
 	newUser->setPosition(initLoc);
 	newUser->setName(username);
 	this->addChild(newUser);
