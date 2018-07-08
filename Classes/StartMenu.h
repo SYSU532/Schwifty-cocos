@@ -4,9 +4,9 @@
 
 #include "cocos2d.h"
 #include "NetWorkAccess.h"
-#include "network/HttpClient.h"
-#include "json/rapidjson.h"
-#include "json/document.h"
+#include "network\HttpClient.h"
+#include "json\rapidjson.h"
+#include "json\document.h"
 
 using namespace cocos2d;
 using namespace cocos2d::network;

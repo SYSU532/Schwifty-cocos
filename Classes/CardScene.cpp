@@ -162,8 +162,8 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 		cardPos->setPosition(originPos[target]);
 	}
 	initAndCleanClick();
-    for (int i = 0; i < outFlag.size(); i++) {
-		outFlag[i] = false;
+	for (auto& e : outFlag) {
+		e = false;
 	}
 
 }

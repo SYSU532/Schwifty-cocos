@@ -84,7 +84,11 @@ void HelloWorld::networkUpdate(float f) {
 			}
 			else if (sign == "newLoc" && usrname != username) {
 				auto targetUser = (Sprite*)root->getChildByName(usrname);
-				targetUser->setPosition(Vec2(x, y));
+				if (targetUser == NULL) {
+					addNewUser(usrname, rickType, Vec2(x, y));
+					targetUser = (Sprite*)root->getChildByName(usrname);
+					targetUser->setPosition(Vec2(x, y));
+				}
 			}
 		}
 	}
