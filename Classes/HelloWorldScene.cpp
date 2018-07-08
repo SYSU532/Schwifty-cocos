@@ -90,6 +90,26 @@ void HelloWorld::networkUpdate(float f) {
 				}
 				else {
 					targetUser = (Sprite*)root->getChildByName(usrname);
+					auto loc = targetUser->getPosition();
+					auto rickType = UserDefault::getInstance()->getIntegerForKey(usrname.c_str());
+					string path; 
+					if (loc.y != y) {
+						if (loc.y < y) {
+							path = "characters/" + Value(rickType).asString() + "/Rick8.png";
+						}
+						else if (loc.y > y){
+							path = "characters/" + Value(rickType).asString() + "/Rick0.png";
+						}
+					}
+					else if (loc.x != x) {
+						if (loc.x < x) {
+							path = "characters/" + Value(rickType).asString() + "/Rick12.png";
+						}
+						else if(loc.x > x){
+							path = "characters/" + Value(rickType).asString() + "/Rick4.png";
+						}
+					}
+					targetUser->getSpriteFrame()->setTexture(CCTextureCache::sharedTextureCache()->addImage(path));
 					targetUser->setPosition(Vec2(x, y));
 				}
 			}
@@ -102,6 +122,7 @@ void HelloWorld::addNewUser(string username, int rickType, Vec2 initLoc) {
 	string path = "characters/" + Value(rickType).asString() + "/Rick4.png";
 	auto newUser = Sprite::create(path);
 	newUser->setScale(0.3);
+	UserDefault::getInstance()->setIntegerForKey(username.c_str(), rickType);
 	newUser->setPosition(initLoc);
 	newUser->setName(username);
 	this->addChild(newUser);
