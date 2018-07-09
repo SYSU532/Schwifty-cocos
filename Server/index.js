@@ -74,15 +74,15 @@ router.post('/userDeckInfo', async (ctx, next) => {
     ctx.response.body = JSON.stringify({deckCount: userDeck.length});
 });
 
-router.get('/schwifty/gameLogOut', async (ctx, next) => {
+router.get('/gameLogOut', async (ctx, next) => {
     let data = ctx.request.query;
     let name = data.username;
     let pass = data.password;
-    if (!connections[getStringMD5(name)]) {
+    if (name && !connections[getStringMD5(name)]) {
         ctx.response.body = "User has not signed in yet!";
         return;
     }
-    if (await model.TestLogIn(name, pass) === 1) {
+    if (name && pass && await model.TestLogIn(name, pass) === 1) {
         connections[getStringMD5(name)].close();
         delete connections[getStringMD5(name)];
         ctx.response.body = "websocket connection deleted!";
@@ -332,7 +332,7 @@ wsServer.on('request', function(request){
                     let returnMsg = `status`;
                     returnMsg += `||${gameSessionArr[instructions[1]].UserOne}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].UserTwo}`;
-                    returnMsg += `||${gameSessionArr[instructions[1].currentPlayer]}`;
+                    returnMsg += `||${gameSessionArr[instructions[1]].currentPlayer}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].wins1}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].wins2}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].deckOne.length}`;
