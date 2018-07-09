@@ -49,6 +49,7 @@ public:
 
 	// Board Rules
 	void initLines();
+	void initGameDatas();
 
 	// Read Cards Roles
 	void initJSONDetails();
@@ -74,6 +75,12 @@ private:
 	Label* targetCardName;
 	Label* targetCardType;
 	bool coinState;
+
+	// Basic Infos of Users
+	string myName;
+	string oppoName;
+	int myRickType;
+	int oppoRickType;
 
 };
 

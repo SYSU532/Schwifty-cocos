@@ -40,15 +40,16 @@ bool CardScene::init()
 	bCoin = Sprite::create("coin0.png");
 	rCoin = Sprite::create("coin1.png");
 	bCoin->setPosition(Vec2(visibleSize.width / 15 - 15, visibleSize.height / 2));
-	bCoin->setScale(0.16);
+	bCoin->setScale(0.18);
 	rCoin->setPosition(bCoin->getPosition());
-	rCoin->setScale(0.16);
+	rCoin->setScale(0.18);
 	rCoin->setVisible(false);
 	this->addChild(rCoin, 1);
 	this->addChild(bCoin, 1);
 
 	coinState = true;
 
+	initGameDatas();
 	initCards();
 	initJSONDetails();
 	initAndCleanClick();
@@ -117,6 +118,25 @@ void CardScene::initLines() {
 	}
 }
 
+void CardScene::initGameDatas() {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	myName = UserDefault::getInstance()->getStringForKey("username");
+	oppoName = UserDefault::getInstance()->getStringForKey("oppoUsername");
+	string path = myName + "_head";
+	myRickType = UserDefault::getInstance()->getIntegerForKey(path.c_str()) - 1;
+	oppoRickType = UserDefault::getInstance()->getIntegerForKey(oppoName.c_str());
+
+	// Adding Characters Cards
+	auto myRickCard = Sprite::create("characters/" + Value(myRickType).asString() + "/head.png");
+	auto oppoRickCard = Sprite::create("characters/" + Value(oppoRickType).asString() + "/head.png");
+	myRickCard->setScale(0.5);
+	oppoRickCard->setScale(0.5);
+	myRickCard->setPosition(Vec2(50, visibleSize.height / 5));
+	oppoRickCard->setPosition(Vec2(50, visibleSize.height - visibleSize.height / 5));
+	this->addChild(myRickCard, 1);
+	this->addChild(oppoRickCard, 1);
+}
+
 void CardScene::initJSONDetails() {
 	string data = FileUtils::getInstance()->getStringFromFile("json/cardset.json");
 	rapidjson::Document doc;
@@ -181,8 +201,8 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 			correctFlag = true;
 			lineCardNum[i]++;
 			auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
-				OrbitCamera::create(0.5, 1, 0, 180, 90, 0, 0), NULL);
-			auto downMove = Sequence::create(OrbitCamera::create(0.5, 1, 0, 0, 90, 0, 0), Hide::create(),
+				OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
+			auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
 				DelayTime::create(0.5), NULL);
 
 			if (coinState) {
