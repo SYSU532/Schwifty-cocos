@@ -78,8 +78,7 @@ private:
 	vector<bool> OppOutFlag;
 	vector<bool> onBoard;
 	vector<int> lineCardNum;
-	vector<int> MyLinePoints; // 0 1 2 total
-	vector<int> OppoLinePoints;
+	vector<int> MyLinePoints; // 0 1 2 | 3 4 5
 	vector<Card*> jsonDetails;
 	vector<Sprite*> allLabels;
 

@@ -191,6 +191,7 @@ void CardScene::addOppoCard(int index) {
 	// Create show image
 	string path0 = "characters/Decks/" + target->type + "/" + target->name + ".png";
 	auto showTarget = Sprite::create(path0);
+	showTarget->setScale(0.17);
 	vector<string> type = { "normal", "epic", "exotic" };
 	int count = 3;
 	for (auto e : type) {
@@ -203,15 +204,14 @@ void CardScene::addOppoCard(int index) {
 	showTarget->setPosition(Vec2(visibleSize.width / 2 - 250 + lineCardNum[count] * 60, theLine->getPosition().y));
 	this->addChild(showTarget, 1);
 	lineCardNum[count]++;
-	changePoints(8 - count, target->attack);
+	changePoints(count, target->attack);
 }
 
 void CardScene::initPointLabels() {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	myPoints = oppoPoints = 0;
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		MyLinePoints.push_back(0);
-		OppoLinePoints.push_back(0);
 	}
 	// My point labels
 	int order_height = visibleSize.height / 2 - 45;
@@ -439,11 +439,17 @@ void CardScene::playOutACard(int i) {
 
 void CardScene::changePoints(int row, int point) {
 	MyLinePoints[row] += point;
-	myPoints += point;
+	int temp = 0;
 	int upOrDown = 0, factor = 0;
 	if (row >= 3) {
 		upOrDown = 1;
+		oppoPoints += point;
+		temp = oppoPoints;
 		factor = 3;
+	}
+	else {
+		myPoints += point;
+		temp = myPoints;
 	}
 	if (MyLinePoints[row] < 10) {
 		allLabels[row * 2 + 1 + factor]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(MyLinePoints[row]).asString() + ".png"));
@@ -453,16 +459,16 @@ void CardScene::changePoints(int row, int point) {
 		allLabels[row * 2 + factor]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
 		allLabels[row * 2 + 1 + factor]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 	}
-	if (myPoints < 10) {
+	if (temp < 10) {
 		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(myPoints).asString() + ".png"));
 	}
-	else if(myPoints < 100){
-		int first = myPoints / 10, second = myPoints % 10;
+	else if(temp < 100){
+		int first = temp / 10, second = temp % 10;
 		allLabels[upOrDown * 8 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
 		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 	}
 	else {
-		int first = myPoints / 100, second = (myPoints - 100 * first) / 10, third = myPoints % 10;
+		int first = temp / 100, second = (temp - 100 * first) / 10, third = temp % 10;
 		allLabels[upOrDown * 8 + 6]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
 		allLabels[upOrDown * 8 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(third).asString() + ".png"));
