@@ -58,6 +58,7 @@ bool CardScene::init()
 	initJSONDetails();
 	initAndCleanClick();
 	initLines();
+	initPointLabels();
 
 	default0 = Sprite::create("default.png");
 	default0->setPosition(Vec2(visibleSize.width - 130, visibleSize.height - 180));
@@ -67,8 +68,8 @@ bool CardScene::init()
 	auto cardPos = default0->getPosition();
 	targetCardName = Label::createWithTTF(" ", "fonts/Marker Felt.ttf", 20);
 	targetCardType = Label::createWithTTF(" ", "fonts/Marker Felt.ttf", 16);
-	targetCardName->setPosition(Vec2(cardPos.x, cardPos.y - 260));
-	targetCardType->setPosition(Vec2(cardPos.x, cardPos.y - 200));
+	targetCardName->setPosition(Vec2(cardPos.x, cardPos.y - 240));
+	targetCardType->setPosition(Vec2(cardPos.x, cardPos.y - 190));
 	targetCardType->setColor(Color3B::ORANGE);
 	this->addChild(targetCardName, 1);
 	this->addChild(targetCardType, 1);
@@ -123,13 +124,22 @@ void CardScene::networkUpdate(float f) {
 		auto res = access0.split(nowMsg, "||");
 		if (res[0] == "deck") {
 			initMyCards(res);
+			access0.GetCurrentStatus(sessionKey);
+		}
+		else if (res[0] == "status") {
+			if (res[1] != myName && Value(res[4]).asInt() == 0 && Value(res[5]).asInt() == 0) {
+				coinState = false;
+				changeBoardState(false);
+				bCoin->setVisible(false);
+				rCoin->setVisible(true);
+			}
 		}
 	}
 }
 
 void CardScene::initLines() {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
-	int order_height = 110;
+	int order_height = 98;
 	for (int i = 0; i < 3; i++) {
 		auto sp1 = Sprite::create("line.png");
 		sp1->setPosition(Vec2(visibleSize.width / 2 - 40, order_height));
@@ -137,9 +147,72 @@ void CardScene::initLines() {
 		sp1->setName("line" + Value(i).asString());
 		sp1->setContentSize(Size(1000, sp1->getContentSize().height));
 		order_height += sp1->getContentSize().height - 65;
-		sp1->setVisible(false);
+		//sp1->setVisible(false);
 		this->addChild(sp1, 1);
 	}
+}
+
+void CardScene::initPointLabels() {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	myPoints = oppoPoints = 0;
+	for (int i = 0; i < 3; i++) {
+		MyLinePoints.push_back(0);
+		OppoLinePoints.push_back(0);
+	}
+	// My point labels
+	int order_height = visibleSize.height / 2 - 45;
+	for (int i = 0; i < 3; i++) {
+		auto num1 = Sprite::create("characters/Numbers/number0.png");
+		auto num2 = Sprite::create("characters/Numbers/number0.png");
+		num1->setPosition(Vec2(143, order_height));
+		num2->setPosition(Vec2(163, order_height));
+		num1->setScale(0.6);
+		num2->setScale(0.6);
+		this->addChild(num1, 1);
+		this->addChild(num2, 1);
+		allLabels.push_back(num1);
+		allLabels.push_back(num2);
+		order_height -= 75;
+	}
+	// My Total labels
+	auto num1 = Sprite::create("characters/Numbers/number0.png");
+	auto num2 = Sprite::create("characters/Numbers/number0.png");
+	num1->setPosition(Vec2(42, visibleSize.height / 2 - 34));
+	num2->setPosition(Vec2(62, visibleSize.height / 2 - 34));
+	num1->setScale(0.6);
+	num2->setScale(0.6);
+	this->addChild(num1, 1);
+	this->addChild(num2, 1);
+	allLabels.push_back(num1);
+	allLabels.push_back(num2);
+
+	// Opponent point Labels
+	order_height = visibleSize.height / 2 + 60;
+	for (int i = 0; i < 3; i++) {
+		auto num1 = Sprite::create("characters/Numbers/number0.png");
+		auto num2 = Sprite::create("characters/Numbers/number0.png");
+		num1->setPosition(Vec2(143, order_height));
+		num2->setPosition(Vec2(163, order_height));
+		num1->setScale(0.6);
+		num2->setScale(0.6);
+		this->addChild(num1, 1);
+		this->addChild(num2, 1);
+		allLabels.push_back(num1);
+		allLabels.push_back(num2);
+		order_height += 75;
+	}
+	// Opponent total labels
+	// My Total labels
+	auto num3 = Sprite::create("characters/Numbers/number0.png");
+	auto num4 = Sprite::create("characters/Numbers/number0.png");
+	num3->setPosition(Vec2(42, visibleSize.height / 2 + 87));
+	num4->setPosition(Vec2(62, visibleSize.height / 2 + 87));
+	num3->setScale(0.6);
+	num4->setScale(0.6);
+	this->addChild(num3, 1);
+	this->addChild(num4, 1);
+	allLabels.push_back(num3);
+	allLabels.push_back(num4);
 }
 
 void CardScene::initGameDatas() {
@@ -243,6 +316,8 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 	}
 	auto root = Director::getInstance()->getRunningScene();
 	auto cardPos = (Sprite*)root->getChildByTag(target);
+	string name = cardNames[target].second;
+	Card* theCard = getCardByName(name);
 	if (onBoard[target] == true) {
 		cardPos->setPosition(originPos[target]);
 		return;
@@ -260,6 +335,7 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 			originPos[target] = cardPos->getPosition();
 			correctFlag = true;
 			lineCardNum[i]++;
+			changePoints(2-i, theCard->attack);
 			auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
 				OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
 			auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
@@ -287,6 +363,30 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 		outFlag[i] = false;
 	}
 
+}
+
+void CardScene::changePoints(int row, int point) {
+	MyLinePoints[row] += point;
+	myPoints += point;
+	int upOrDown = 0;
+	if (MyLinePoints[row] < 10) {
+		allLabels[row * 2 + 1]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(MyLinePoints[row]).asString() + ".png"));
+	}
+	else {
+		int first = MyLinePoints[row] / 10, second = MyLinePoints[row] % 10;
+		allLabels[row * 2]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
+		allLabels[row * 2 + 1]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
+	}
+	if (row >= 3)
+		upOrDown = 1;
+	if (myPoints < 10) {
+		allLabels[upOrDown * 7 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(myPoints).asString() + ".png"));
+	}
+	else {
+		int first = myPoints / 10, second = myPoints % 10;
+		allLabels[upOrDown * 6 + 6]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
+		allLabels[upOrDown * 7 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
+	}
 }
 
 void CardScene::changeBoardState(bool flag) {
@@ -348,13 +448,13 @@ void CardScene::onMouseMoved(Event* e) {
 			if (sp->getPosition().getDistance(pos) <= 40) {
 				if (!outFlag[i]) {
 					outFlag[i] = true;
-					auto animate = ScaleTo::create(1.0f, 0.20f, 0.20f);
+					auto animate = ScaleTo::create(0.5f, 0.20f, 0.20f);
 					sp->runAction(animate);
 				}
 			}
 			else {
 				if (outFlag[i]) {
-					auto animate = ScaleTo::create(1.0f, 0.17f, 0.17f);
+					auto animate = ScaleTo::create(0.5f, 0.17f, 0.17f);
 					sp->runAction(animate);
 				}
 				outFlag[i] = false;
@@ -367,13 +467,13 @@ void CardScene::onMouseMoved(Event* e) {
 			if (oppoCard->getPosition().getDistance(pos) <= 40) {
 				if (!OppOutFlag[i]) {
 					OppOutFlag[i] = true;
-					auto animate = ScaleTo::create(1.0f, 0.24f, 0.24f);
+					auto animate = ScaleTo::create(0.5f, 0.24f, 0.24f);
 					oppoCard->runAction(animate);
 				}
 			}
 			else {
 				if (OppOutFlag[i]) {
-					auto animate = ScaleTo::create(1.0f, 0.21f, 0.21f);
+					auto animate = ScaleTo::create(0.5f, 0.21f, 0.21f);
 					oppoCard->runAction(animate);
 				}
 				OppOutFlag[i] = false;

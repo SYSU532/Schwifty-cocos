@@ -57,7 +57,9 @@ public:
 	// Board Rules
 	void initLines();
 	void initGameDatas();
+	void initPointLabels();
 	void changeBoardState(bool flag);
+	void changePoints(int row, int point);
 
 	// Read Cards Roles
 	void initJSONDetails();
@@ -77,7 +79,10 @@ private:
 	vector<bool> OppOutFlag;
 	vector<bool> onBoard;
 	vector<int> lineCardNum;
+	vector<int> MyLinePoints; // 0 1 2 total
+	vector<int> OppoLinePoints;
 	vector<Card*> jsonDetails;
+	vector<Sprite*> allLabels;
 
 	// Coin characters And Scale animations
 	Sprite* bCoin;
@@ -97,6 +102,8 @@ private:
 	string sessionKey;
 	int myRickType;
 	int oppoRickType;
+	int myPoints;
+	int oppoPoints;
 
 	// NetWork Message
 	string nowMsg;
