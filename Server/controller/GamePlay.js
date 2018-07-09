@@ -174,6 +174,7 @@ class GameSession {
     }
 
     playCard(username, cardIndex) {
+        cardIndex = parseInt(cardIndex);
         if (this.currentRound > 3) {
             return {status: false, msg: 'Session is already over.'};
         }
