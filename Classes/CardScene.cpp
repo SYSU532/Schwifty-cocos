@@ -460,18 +460,18 @@ void CardScene::changePoints(int row, int point) {
 		allLabels[row * 2 + 1 + factor]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 	}
 	if (temp < 10) {
-		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(myPoints).asString() + ".png"));
+		allLabels[upOrDown * 8 + 9]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(myPoints).asString() + ".png"));
 	}
 	else if(temp < 100){
 		int first = temp / 10, second = temp % 10;
-		allLabels[upOrDown * 8 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
-		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
+		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
+		allLabels[upOrDown * 8 + 9]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 	}
 	else {
 		int first = temp / 100, second = (temp - 100 * first) / 10, third = temp % 10;
-		allLabels[upOrDown * 8 + 6]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
-		allLabels[upOrDown * 8 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
-		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(third).asString() + ".png"));
+		allLabels[upOrDown * 8 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
+		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
+		allLabels[upOrDown * 8 + 9]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(third).asString() + ".png"));
 	}
 }
 
