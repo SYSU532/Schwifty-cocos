@@ -189,7 +189,7 @@ void CardScene::addOppoCard(int index) {
 	tt->removeFromParentAndCleanup(true);
 	Card* target = getCardByID(index);
 	// Create show image
-	string path0 = "characters/" + target->type + "/" + target->name + ".png";
+	string path0 = "characters/Decks/" + target->type + "/" + target->name + ".png";
 	auto showTarget = Sprite::create(path0);
 	vector<string> type = { "normal", "epic", "exotic" };
 	int count = 3;
