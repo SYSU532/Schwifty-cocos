@@ -298,13 +298,13 @@ wsServer.on('request', function(request){
                     if (gameSessionArr[instructions[1]].UserOne === instructions[2]) {
                         let msg = `attackPt||${instructions[2]}||`;
                         let ground = gameSessionArr[instructions[1]].ground1;
-                        msg += `${ground.NormalAttack}||${ground.EpicAttack}||${ground.ExoticAttack}||${ground.TotalAttck}`;
+                        msg += `${ground.NormalAttack}||${ground.EpicAttack}||${ground.ExoticAttack}||${ground.TotalAttack}`;
                         conn.sendUTF(msg);
                     }
                     else if (gameSessionArr[instructions[1]].UserTwo === instructions[2]) {
                         let msg = `attackPt||${instructions[2]}||`;
                         let ground = gameSessionArr[instructions[1]].ground2;
-                        msg += `${ground.NormalAttack}||${ground.EpicAttack}||${ground.ExoticAttack}||${ground.TotalAttck}`;
+                        msg += `${ground.NormalAttack}||${ground.EpicAttack}||${ground.ExoticAttack}||${ground.TotalAttack}`;
                         conn.sendUTF(msg);
                     }
                     else {

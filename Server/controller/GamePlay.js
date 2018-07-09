@@ -1,5 +1,5 @@
 const deckDB = require('./../model/gamePlayDB');
-const cardSet = require('./cardset');
+const cardSet = require('./CardSet');
 
 //Global Identifiers
 const NORMAL = 0;
@@ -47,7 +47,7 @@ class Ground {
         return sum;
     }
 
-    get TotalAttck() {
+    get TotalAttack() {
         return this.NormalAttack + this.EpicAttack + this.ExoticAttack;
     }
 

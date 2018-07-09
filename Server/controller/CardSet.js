@@ -45,8 +45,8 @@ class CardSet {
                     throw "Unknown Card type: " + card.type;
                     break;
             }
-            this.indexes.push(newCard);
-            this.collection.push();
+            this.indexes.push(card.index);
+            this.collection.push(newCard);
         }
     }
 
