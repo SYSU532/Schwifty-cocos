@@ -395,6 +395,7 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 		else if (i == 0)
 			judge_height = 100;
 		if (temp->getBoundingBox().containsPoint(cardPos->getPosition()) && theCard->type == type[i]) {
+			playOutACard(target);
 			cardPos->setPosition(Vec2(visibleSize.width / 2 - 250 + lineCardNum[i]*60, judge_height + 100*i));
 			onBoard[target] = true;
 			originPos[target] = cardPos->getPosition();
