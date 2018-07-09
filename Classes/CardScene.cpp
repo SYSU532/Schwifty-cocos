@@ -106,10 +106,7 @@ void CardScene::initJSONDetails() {
 	string data = FileUtils::getInstance()->getStringFromFile("json/cardset.json");
 	rapidjson::Document doc;
 	doc.Parse(data.c_str());
-    printf("%s", data.data());
-	
     auto cardArr = doc.GetArray();
-    auto test = cardArr.Size();
     for (auto& obj : cardArr) {
         auto store = new Card(obj["attack"].GetInt(), obj["type"].GetString(), obj["name"].GetString(), obj["index"].GetInt());
         jsonDetails.push_back(store);
