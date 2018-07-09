@@ -74,7 +74,7 @@ router.post('/userDeckInfo', async (ctx, next) => {
     ctx.response.body = JSON.stringify({deckCount: userDeck.length});
 });
 
-router.get('/gameLogOut', async (ctx, next) => {
+router.get('/schwifty/gameLogOut', async (ctx, next) => {
     let data = ctx.request.query;
     let name = data.username;
     let pass = data.password;
@@ -188,7 +188,7 @@ wsServer.on('request', function(request){
                 gameRequest[targetUserMD5].splice(gameRequest[targetUserMD5].indexOf(instructions[1]), 1);
                 conn.sendUTF(`reqAc||${instructions[2]}||${sessionKey}`);
                 connections[targetUserMD5].sendUTF(`reqAc||${connections[instructions[1]].user}||${sessionKey}`);
-                gameSessionArr[sessionKey] = new gamePlay.session(connections[instructions[1]].user, instructions[2]);
+                gameSessionArr[sessionKey] = new gamePlay.session(instructions[2], connections[instructions[1]].user);
                 break;
             //allReq&&key
             case 'allreq':
@@ -284,6 +284,16 @@ wsServer.on('request', function(request){
                         else if (conn.user === gameSessionArr[instructions[1]].UserTwo) {
                             connections[getStringMD5(gameSessionArr[instructions[1]].UserOne)].sendUTF(`opEndRound`);
                         }
+                        if (result.nextRound) {
+                            if (gameSessionArr[instructions[1]].currentRound > 3) {
+                                connections[getStringMD5(gameSessionArr[instructions[1]].UserTwo)].sendUTF('winner||' + gameSessionArr[instructions[1]].Winner);
+                                connections[getStringMD5(gameSessionArr[instructions[1]].UserOne)].sendUTF('winner||' + gameSessionArr[instructions[1]].Winner);
+                            }
+                            else {
+                                connections[getStringMD5(gameSessionArr[instructions[1]].UserOne)].sendUTF('goNextRound');
+                                connections[getStringMD5(gameSessionArr[instructions[1]].UserTwo)].sendUTF('goNextRound');
+                            }
+                        }
                     }
                     else conn.sendUTF('err||' + result.msg);
                 }
@@ -320,6 +330,9 @@ wsServer.on('request', function(request){
                 }
                 else {
                     let returnMsg = `status`;
+                    returnMsg += `||${gameSessionArr[instructions[1]].UserOne}`;
+                    returnMsg += `||${gameSessionArr[instructions[1]].UserTwo}`;
+                    returnMsg += `||${gameSessionArr[instructions[1].currentPlayer]}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].wins1}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].wins2}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].deckOne.length}`;
@@ -412,6 +425,17 @@ wsServer.on('request', function(request){
                     msg += `||${user}||${loc.rickType}||${loc.x}||${loc.y}`;
                 }
                 conn.sendUTF(msg);
+                break;
+            //getWinner&&sessionKey
+            case 'getwinner':
+                if (!gameSessionArr[instructions[1]]) {
+                    conn.sendUTF('err||Requested session invalid!');
+                    return;
+                }
+                else {
+                    let result = gameSessionArr[instructions[1]];
+                    conn.sendUTF('winner||' + result);
+                }
                 break;
             default:
                 conn.sendUTF('err||Wrong request!');
