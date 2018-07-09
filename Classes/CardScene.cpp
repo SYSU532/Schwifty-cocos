@@ -21,7 +21,7 @@ bool CardScene::init()
 	auto origin = Director::getInstance()->getVisibleOrigin();
 	
 	auto bg = Sprite::create("board.png");
-	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height /2 + 20));
+	bg->setPosition(Vec2(visibleSize.width / 2, visibleSize.height /2));
 	bg->setScale(visibleSize.width / bg->getContentSize().width,
 		visibleSize.height / bg->getContentSize().height);
 	this->addChild(bg, 0);
@@ -39,7 +39,7 @@ bool CardScene::init()
 
 	bCoin = Sprite::create("coin0.png");
 	rCoin = Sprite::create("coin1.png");
-	bCoin->setPosition(Vec2(visibleSize.width / 15 - 15, visibleSize.height / 2));
+	bCoin->setPosition(Vec2(visibleSize.width / 15 - 15, visibleSize.height / 2 + 30));
 	bCoin->setScale(0.18);
 	rCoin->setPosition(bCoin->getPosition());
 	rCoin->setScale(0.18);
@@ -47,10 +47,14 @@ bool CardScene::init()
 	this->addChild(rCoin, 1);
 	this->addChild(bCoin, 1);
 
+	schedule(schedule_selector(CardScene::networkUpdate), 0.02f, kRepeatForever, 0);
+
+	nowMsg = "";
+	sessionKey = UserDefault::getInstance()->getStringForKey("sessionKey");
+	access0.GetCurrentDecks(sessionKey);
 	coinState = true;
 
 	initGameDatas();
-	initCards();
 	initJSONDetails();
 	initAndCleanClick();
 	initLines();
@@ -63,8 +67,8 @@ bool CardScene::init()
 	auto cardPos = default0->getPosition();
 	targetCardName = Label::createWithTTF(" ", "fonts/Marker Felt.ttf", 20);
 	targetCardType = Label::createWithTTF(" ", "fonts/Marker Felt.ttf", 16);
-	targetCardName->setPosition(Vec2(cardPos.x, cardPos.y - 240));
-	targetCardType->setPosition(Vec2(cardPos.x, cardPos.y - 180));
+	targetCardName->setPosition(Vec2(cardPos.x, cardPos.y - 260));
+	targetCardType->setPosition(Vec2(cardPos.x, cardPos.y - 200));
 	targetCardType->setColor(Color3B::ORANGE);
 	this->addChild(targetCardName, 1);
 	this->addChild(targetCardType, 1);
@@ -72,20 +76,17 @@ bool CardScene::init()
 	return true;
 }
 
-void CardScene::initCards() {
+void CardScene::initMyCards(vector<string> res) {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	// Init User's Cards
-	for (int i = 0; i < 7; i++) {
-		auto temp = Sprite::create("characters/Decks/normal/RabbitMorty.png");
-		cards.push_back(pair<int, Sprite*>(i, temp));
-		cardNames.push_back(pair<int, string>(i, "RabbitMorty"));
+	for (int i = 2; i < res.size(); i++) {
+		int id = Value(res[i]).asInt();
+		auto result = getCardByID(id);
+		string path0 = "characters/Decks/" + result->type + "/" + result->name + ".png";
+		auto temp = Sprite::create(path0);
+		cards.push_back(pair<int, Sprite*>(i - 2, temp));
+		cardNames.push_back(pair<int, string>(i - 2, result->name));
 	}
-	for (int i = 0; i < 6; i++) {
-		auto temp = Sprite::create("characters/Decks/normal/Morty.png");
-		cards.push_back(pair<int, Sprite*>(i + 7, temp));
-		cardNames.push_back(pair<int, string>(i + 7, "Morty"));
-	}
-
 
 	// Show cards
 	int borderWidth = 70;
@@ -101,6 +102,20 @@ void CardScene::initCards() {
 		i++;
 	}
 
+}
+
+void CardScene::networkUpdate(float f) {
+	string newMsg = access0.getMessage();
+	auto root = Director::getInstance()->getRunningScene();
+	if (nowMsg != newMsg) {
+		nowMsg = newMsg;
+		auto res = access0.split(nowMsg, "||");
+		if (res[0] == "deck") {
+			if (res[1] == myName) {
+				initMyCards(res);
+			}
+		}
+	}
 }
 
 void CardScene::initLines() {
@@ -129,12 +144,44 @@ void CardScene::initGameDatas() {
 	// Adding Characters Cards
 	auto myRickCard = Sprite::create("characters/" + Value(myRickType).asString() + "/head.png");
 	auto oppoRickCard = Sprite::create("characters/" + Value(oppoRickType).asString() + "/head.png");
-	myRickCard->setScale(0.5);
-	oppoRickCard->setScale(0.5);
-	myRickCard->setPosition(Vec2(50, visibleSize.height / 5));
-	oppoRickCard->setPosition(Vec2(50, visibleSize.height - visibleSize.height / 5));
+	auto myNameLabel = Label::createWithTTF(myName, "fonts/Marker Felt.ttf", 40);
+	auto oppoNameLabel = Label::createWithTTF(oppoName, "fonts/Marker Felt.ttf", 40);
+	myRickCard->setScale(0.28);
+	oppoRickCard->setScale(0.28);
+	myRickCard->addChild(myNameLabel, 1);
+	oppoRickCard->addChild(oppoNameLabel, 1);
+	myRickCard->setPosition(Vec2(55, visibleSize.height / 5 + 50));
+	oppoRickCard->setPosition(Vec2(55, visibleSize.height - visibleSize.height / 5));
+	myNameLabel->setPosition(Vec2(myRickCard->getContentSize().width / 2, 80));
+	oppoNameLabel->setPosition(Vec2(oppoRickCard->getContentSize().width / 2, 80));
 	this->addChild(myRickCard, 1);
 	this->addChild(oppoRickCard, 1);
+
+	// Adding Blue blinks
+	myBlueBoardLeft = ParticleMeteor::create();
+	myBlueBoardRight = ParticleMeteor::create();
+	myBlueBoardLeft->setTexture(Director::getInstance()->getTextureCache()->addImage("blue.jpg"));
+	myBlueBoardRight->setTexture(Director::getInstance()->getTextureCache()->addImage("blue.jpg"));
+	myBlueBoardLeft->setPosition(Vec2(visibleSize.width / 2, -10));
+	myBlueBoardRight->setPosition(myBlueBoardLeft->getPosition());
+	myBlueBoardLeft->setRotation(-45);
+	this->addChild(myBlueBoardLeft, 0);
+	myBlueBoardRight->setRotation(135);
+	this->addChild(myBlueBoardRight, 0);
+
+	// Adding Red blinks
+	oppoRedBoradLeft = ParticleFire::create();
+	oppoRedBoradRight = ParticleFire::create();
+	oppoRedBoradLeft->setTexture(Director::getInstance()->getTextureCache()->addImage("fire.png"));
+	oppoRedBoradRight->setTexture(Director::getInstance()->getTextureCache()->addImage("fire.png"));
+	oppoRedBoradLeft->setPosition(Vec2(visibleSize.width / 2 - 70, visibleSize.height + 35));
+	oppoRedBoradLeft->setRotation(-90);
+	oppoRedBoradRight->setPosition(Vec2(visibleSize.width / 2, visibleSize.height + 35));
+	oppoRedBoradRight->setRotation(90);
+	oppoRedBoradLeft->setVisible(false);
+	oppoRedBoradRight->setVisible(false);
+	this->addChild(oppoRedBoradLeft, 0);
+	this->addChild(oppoRedBoradRight, 0);
 }
 
 void CardScene::initJSONDetails() {
@@ -208,11 +255,13 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 			if (coinState) {
 				bCoin->runAction(downMove);
 				rCoin->runAction(upMove);
+				changeBoardState(false);
 				coinState = false;
 			}
 			else {
 				bCoin->runAction(upMove);
 				rCoin->runAction(downMove);
+				changeBoardState(true);
 				coinState = true;
 			}
 		}
@@ -225,6 +274,21 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 		outFlag[i] = false;
 	}
 
+}
+
+void CardScene::changeBoardState(bool flag) {
+	if (flag) {
+		myBlueBoardLeft->setVisible(true);
+		myBlueBoardRight->setVisible(true);
+		oppoRedBoradLeft->setVisible(false);
+		oppoRedBoradRight->setVisible(false);
+	}
+	else {
+		myBlueBoardLeft->setVisible(false);
+		myBlueBoardRight->setVisible(false);
+		oppoRedBoradLeft->setVisible(true);
+		oppoRedBoradRight->setVisible(true);
+	}
 }
 
 void CardScene::onTouchMoved(Touch *touch, Event *event) {
@@ -287,6 +351,13 @@ void CardScene::onMouseMoved(Event* e) {
 Card* CardScene::getCardByName(string cardname) {
 	for (auto e : jsonDetails) {
 		if (e->name == cardname)
+			return e;
+	}
+}
+
+Card* CardScene::getCardByID(int id) {
+	for (auto e : jsonDetails) {
+		if (e->index == id)
 			return e;
 	}
 }

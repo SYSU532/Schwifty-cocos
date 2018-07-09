@@ -37,6 +37,7 @@ public:
 
 	// Decks Functions
 	void GetAllDecks(string username);
+	void GetCurrentDecks(string sessionKey);
 	void PlayOutaCard(string sessionKey, string cardIndex);
 	void EndRound(string sesssionKey);
 	void GetAttackPoints(string sessionKey, string username);

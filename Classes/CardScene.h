@@ -5,6 +5,7 @@
 #include "cocos2d.h"
 #include "json/rapidjson.h"
 #include "json/document.h"
+#include "NetWorkAccess.h"
 #include <vector>
 
 using namespace cocos2d;
@@ -30,8 +31,13 @@ public:
 	virtual bool init();
 
 	// Play Cards Logic Functions
-	void initCards();
+	void initMyCards(vector<string> res);
+	void initOppoCards(vector<string> res);
+
 	void useCard(int index);
+
+	// NetWork Listener
+	void networkUpdate(float f);
 
 	// Touch Functions
 	bool onTouchBegan(Touch *touch, Event *event);
@@ -50,10 +56,12 @@ public:
 	// Board Rules
 	void initLines();
 	void initGameDatas();
+	void changeBoardState(bool flag);
 
 	// Read Cards Roles
 	void initJSONDetails();
 	Card* getCardByName(string cardname);
+	Card* getCardByID(int id);
 
 
 	CREATE_FUNC(CardScene);
@@ -77,10 +85,18 @@ private:
 	bool coinState;
 
 	// Basic Infos of Users
+	ParticleSystem* myBlueBoardLeft;
+	ParticleSystem* myBlueBoardRight;
+	ParticleSystem* oppoRedBoradLeft;
+	ParticleSystem* oppoRedBoradRight;
 	string myName;
 	string oppoName;
+	string sessionKey;
 	int myRickType;
 	int oppoRickType;
+
+	// NetWork Message
+	string nowMsg;
 
 };
 

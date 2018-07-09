@@ -57,8 +57,12 @@ void NetWorkAccess::GetAllInvitations(string userKey) {
 // Decks Functions
 void NetWorkAccess::GetAllDecks(string username) {
 	string sendStr = "getAllDeck&&" + username;
+	m_wSocket->send(sendStr);	
+}
+
+void NetWorkAccess::GetCurrentDecks(string sessionKey) {
+	string sendStr = "getDeck&&" + sessionKey;
 	m_wSocket->send(sendStr);
-	
 }
 
 void NetWorkAccess::PlayOutaCard(string sessionKey, string cardIndex) {
