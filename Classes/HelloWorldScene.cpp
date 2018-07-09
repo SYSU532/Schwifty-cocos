@@ -79,6 +79,14 @@ void HelloWorld::initAllUsers() {
 	access0.GetAllUserLocation();
 }
 
+bool HelloWorld::checkUserIsIn(string username) {
+	for (auto e : otherPlayers) {
+		if (e.first == username)
+			return true;
+	}
+	return false;
+}
+
 void HelloWorld::networkUpdate(float f) {
 	string newMsg = access0.getMessage();
 	auto root = Director::getInstance()->getRunningScene();
@@ -90,13 +98,14 @@ void HelloWorld::networkUpdate(float f) {
 			int rickType = Value(res[2]).asInt();
 			float x = Value(res[3]).asFloat(), y = Value(res[4]).asFloat();
 			if (sign == "newUser" && usrname != username) {
+				// New User Join in
 				addNewUser(usrname, rickType, Vec2(x, y));
 			}
 			else if (sign == "newLoc" && usrname != username) {
+				// Update Old User Locations
 				auto targetUser = (Sprite*)root->getChildByName(usrname);
 				if (targetUser == NULL) {
 					addNewUser(usrname, rickType, Vec2(x, y));
-					
 				}
 				else {
 					targetUser = (Sprite*)root->getChildByName(usrname);
@@ -141,13 +150,47 @@ void HelloWorld::networkUpdate(float f) {
 				}
 			}
 		}
-		else if (res.size() == 2 && res[0] == "userLogOut") {
-			deleteUser(res[1]);
+		else if (res.size() == 2) {
+			if(res[0] == "userLogOut")
+				deleteUser(res[1]);
+			else {
+				MyDialog* dt = MyDialog::create();
+				dt->chooseMode(3);
+				if (res[0] == "reqDec") {
+					// User Not Online
+					dt->setTitle("Request Failed");
+					this->addChild(dt, 1);
+					dt->changeMsg("User " + targetUserName + " Not Online!", false);
+				}
+				else if (res[0] == "reqPend") {
+					// Request successfully send
+					dt->setTitle("Request Success");
+					this->addChild(dt, 1);
+					dt->changeMsg("Request has Successfully \n sent to " + targetUserName + " !", true);
+				}
+			}
+		}
+		else if (res.size() == 3) {
+			MyDialog* dp = MyDialog::create();
+			if (res[0] == "reqAc") {
+				// Start Game
+				UserDefault::getInstance()->setStringForKey("sessionKey", res[2]);
+				dp->setTitle("Are you ready?");
+				dp->chooseMode(4);
+				dp->setEnterCallBackFunc(this, callfuncN_selector(HelloWorld::jumpToPlayCards));
+				this->addChild(dp, 1);
+				dp->changeMsg("Ready to start Schwifty Cards ?", true);
+			}
+			else if (res[0] == "recReq") {
+				// Receive request from others
+
+			}
 		}
 		else {
 			auto sign = res[0];
 			int size = res.size();
 			if (sign == "locs") {
+				// Init All Online Users Locations
 				for (int i = 1; i < res.size(); i += 4) {
 					string usrname = res[i];
 					if (usrname != username) {
@@ -163,6 +206,8 @@ void HelloWorld::networkUpdate(float f) {
 }
 
 void HelloWorld::addNewUser(string username, int rickType, Vec2 initLoc) {
+	if (checkUserIsIn(username))
+		return;
 	string path = "characters/" + Value(rickType).asString() + "/Rick4.png";
 	auto newUser = Sprite::create(path);
 	newUser->setScale(0.3);
@@ -246,8 +291,20 @@ void HelloWorld::sendGameRequest() {
 		auto other = e.second;
 		if (requestRect.containsPoint(other->getPosition())) {
 			MyDialog* dd = MyDialog::create();
+			for (auto e : gameRequests) {
+				if (e.first == name && e.second == true) {
+					dd->setTitle("Warning");
+					dd->chooseMode(3);
+					this->addChild(dd, 1);
+					dd->changeMsg("You have already send request to \n" + name + " ! Please wait for response !", false);
+					return;
+				}
+			}
+			targetUserName = name;
 			dd->chooseMode(2);
 			dd->setTitle("Invitation Confirm");
+			dd->setEnterCallBackFunc(this, callfuncN_selector(HelloWorld::sendNetWorkRequest));
+			dd->setName("Invitation Confirm");
 			this->addChild(dd, 1);
 			dd->changeMsg("Do you want to invite " + name + "\nto start playing Schwifty Cards?", true);
 			return;
@@ -307,6 +364,20 @@ void HelloWorld::showRequestIcon() {
 			other->addChild(requestLabel, 1);
 		}
 	}
+}
+
+void HelloWorld::sendNetWorkRequest(Node* node) {
+	access0.InviteToGame(userKey, targetUserName);
+	gameRequests.push_back(pair<string, bool>(targetUserName, true));
+	auto root = Director::getInstance()->getRunningScene();
+	if (root->getChildByName("Invitation Confirm") != NULL)
+		root->getChildByName("Invitation Confirm")->removeFromParentAndCleanup(true);
+}
+
+void HelloWorld::jumpToPlayCards(Node* node) {
+	Scene* s = CardScene::createScene();
+	auto animate = TransitionFade::create(0.7f, s);
+	Director::getInstance()->replaceScene(animate);
 }
 
 void HelloWorld::move(char dir) {

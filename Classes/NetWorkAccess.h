@@ -40,6 +40,8 @@ public:
 	void PlayOutaCard(string sessionKey, string cardIndex);
 	void EndRound(string sesssionKey);
 	void GetAttackPoints(string sessionKey, string username);
+	void GetCurrentStatus(string sessionKey);
+	void GetRound(string sessionKey, string username);
 
 	// Users Moving Functions
 	void UpdateUserLocation(string userKey, int rickType, float x, float y);

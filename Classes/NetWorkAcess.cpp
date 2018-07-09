@@ -56,23 +56,35 @@ void NetWorkAccess::GetAllInvitations(string userKey) {
 
 // Decks Functions
 void NetWorkAccess::GetAllDecks(string username) {
-
+	string sendStr = "getAllDeck&&" + username;
+	m_wSocket->send(sendStr);
 	
 }
 
 void NetWorkAccess::PlayOutaCard(string sessionKey, string cardIndex) {
-
+	string sendStr = "play&&" + sessionKey + "&&" + cardIndex;
+	m_wSocket->send(sendStr);
 	
 }
 
-void NetWorkAccess::EndRound(string sesssionKey) {
-
-	
+void NetWorkAccess::EndRound(string sessionKey) {
+	string sendStr = "endRound&&" + sessionKey;
+	m_wSocket->send(sendStr);
 }
 
 void NetWorkAccess::GetAttackPoints(string sessionKey, string username) {
+	string sendStr = "attackPt&&" + sessionKey + "&&" + username;
+	m_wSocket->send(sendStr);
+}
 
-	
+void NetWorkAccess::GetCurrentStatus(string sessionKey) {
+	string sendStr = "getStatus&&" + sessionKey;
+	m_wSocket->send(sendStr);
+}
+
+void NetWorkAccess::GetRound(string sessionKey, string username) {
+	string sendStr = "getRound&&" + sessionKey + "&&" + username;
+	m_wSocket->send(sendStr);
 }
 
 // Moving Update Functions

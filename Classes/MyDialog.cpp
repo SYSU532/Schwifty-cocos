@@ -44,8 +44,10 @@ bool MyDialog::init() {
 	auto cancel = LabelTTF::create("Cancel", "arial", 30);
 	enter->setPosition(size1 / 2);
 	enter->setColor(Color3B::BLACK);
+	Enter->setName("Enter");
 	cancel->setPosition(size2 / 2);
 	cancel->setColor(Color3B::BLACK);
+	Cancel->setName("Cancel");
 	Enter->addChild(enter);
 	Cancel->addChild(cancel);
 
@@ -97,6 +99,16 @@ void MyDialog::chooseMode(int mode) {
 			break;
 		case 2:
 			setSpriteBackGround(Sprite::create("smallBoard.png"));
+			break;
+		case 3:
+			setSpriteBackGround(Sprite::create("smallBoard.png"));
+			getMenuButton()->getChildByName("Enter")->removeFromParentAndCleanup(true);
+			getMenuButton()->getChildByName("Cancel")->setPosition(Vec2(visibleSize / 2));
+			break;
+		case 4:
+			setSpriteBackGround(Sprite::create("smallBoard.png"));
+			getMenuButton()->getChildByName("Cancel")->removeFromParentAndCleanup(true);
+			getMenuButton()->getChildByName("Enter")->setPosition(Vec2(visibleSize / 2));
 			break;
 	}
 }
@@ -166,26 +178,28 @@ void MyDialog::changeMsg(std::string mes, bool flag) {
 void MyDialog::EnbtnCallBack(CCObject* pSender) {
 	Node* node = dynamic_cast<Node*>(pSender);
 	if (m_callbackListener && m_Entercallback) {
-		auto username = ((TextField*)this->getChildByName("username"))->getString();
-		auto password = ((TextField*)this->getChildByName("password"))->getString();
-		if (labelArr.size() > 2) {
-			auto email = ((TextField*)this->getChildByName("email"))->getString();
-			if (email == "") {
+		if (labelArr.size() >= 2) {
+			auto username = ((TextField*)this->getChildByName("username"))->getString();
+			auto password = ((TextField*)this->getChildByName("password"))->getString();
+			if (labelArr.size() > 2) {
+				auto email = ((TextField*)this->getChildByName("email"))->getString();
+				if (email == "") {
+					changeMsg("Please complete all the input fields!", 0);
+					return;
+				}
+				UserDefault::getInstance()->setStringForKey("email", email);
+			}
+			if (username == "" || password == "") {
 				changeMsg("Please complete all the input fields!", 0);
 				return;
 			}
-			UserDefault::getInstance()->setStringForKey("email", email);
+			else if (username == "username") {
+				changeMsg("Do not write name as \'username\'", 0);
+				return;
+			}
+			UserDefault::getInstance()->setStringForKey("username", username);
+			UserDefault::getInstance()->setStringForKey("password", password);
 		}
-		if (username == "" || password == "") {
-			changeMsg("Please complete all the input fields!", 0);
-			return;
-		}
-		else if (username == "username") {
-			changeMsg("Do not write name as \'username\'", 0);
-			return;
-		}
-		UserDefault::getInstance()->setStringForKey("username", username);
-		UserDefault::getInstance()->setStringForKey("password", password);
 		(m_callbackListener->*m_Entercallback)(node);
 	}
 }

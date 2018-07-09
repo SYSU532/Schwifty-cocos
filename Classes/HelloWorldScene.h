@@ -19,8 +19,9 @@ public:
     
 	// Basic Role Behaviors
 	void sendGameRequest();
-	void receiveGameRequest();
 	void showRequestIcon();
+	void sendNetWorkRequest(Node* node);
+	void jumpToPlayCards(Node* node);
 
 	void move(char c);
 
@@ -32,6 +33,7 @@ public:
 
 	void addNewUser(string username, int rickType, Vec2 initLoc);
 	void deleteUser(string username);
+	bool checkUserIsIn(string username);
 
 	// Touch Functions
 	void onTouchMoved(Touch* touch, Event* event);
@@ -75,7 +77,9 @@ private:
 	bool outFlag;
 	Sprite* player;
 	vector<pair<string, Sprite*> > otherPlayers;
+	vector<pair<string, bool> > gameRequests;
 	Sprite* book;
+	string targetUserName;
 	
 	// WebSocket Messages register
 	string msgType;
