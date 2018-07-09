@@ -110,19 +110,19 @@ class GameSession {
     }
 
     get Winner() {
-        if (this.currentRound === 2 && this.wins1 === 2) {
+        if (this.currentRound === 3 && this.wins1 === 2 && this.wins2 === 0) {
             return this.UserOne;
         }
-        if (this.currentRound === 2 && this.wins2 === 2) {
+        if (this.currentRound === 3 && this.wins2 === 2 && this.wins1 === 0) {
             return this.UserTwo;
         }
-        if (this.wins2 === this.wins1 && this.currentRound === 3) {
+        if (this.wins2 === this.wins1 && this.currentRound > 3) {
             return "Draw";
         }
-        if (this.currentRound === 3 && this.wins1 > this.wins2) {
+        if (this.currentRound > 3 && this.wins1 > this.wins2) {
             return this.UserOne;
         }
-        if (this.currentRound === 3 && this.wins1 < this.wins2) {
+        if (this.currentRound > 3 && this.wins1 < this.wins2) {
             return this.UserTwo;
         }
         return "Unknown";
@@ -172,6 +172,9 @@ class GameSession {
     }
 
     playCard(username, cardIndex) {
+        if (this.currentRound > 3) {
+            return {status: false, msg: 'Session is already over.'};
+        }
         if (this.currentPlayer === this.UserOne && this.UserOne === username) {
             if (this.deckOne.indexOf(cardIndex) === -1) {
                 return {status: false, msg: 'Player does not have the card.'}

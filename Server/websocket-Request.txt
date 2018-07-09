@@ -76,6 +76,11 @@ Get all User Locations获取所有用户位置:
 return:
     locs||username1||rick1||x1||y1||user2||rick2||x2||y2||...
 
+Get session winner 获取该盘游戏胜者：
+    getWinner&&sessionKey
+return:若平局则返回 draw，若该盘游戏尚未结束则返回 unknown
+    winner||username
+
 User Close connection用户离线，其他用户收到：
     userLogOut||username
 

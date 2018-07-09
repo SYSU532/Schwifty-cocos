@@ -416,6 +416,17 @@ wsServer.on('request', function(request){
                 }
                 conn.sendUTF(msg);
                 break;
+            //getWinner&&sessionKey
+            case 'getwinner':
+                if (!gameSessionArr[instructions[1]]) {
+                    conn.sendUTF('err||Requested session invalid!');
+                    return;
+                }
+                else {
+                    let result = gameSessionArr[instructions[1]];
+                    conn.sendUTF('winner||' + result);
+                }
+                break;
             default:
                 conn.sendUTF('err||Wrong request!');
                 break;
