@@ -60,7 +60,7 @@ bool CardScene::init()
 	initLines();
 
 	default0 = Sprite::create("default.png");
-	default0->setPosition(Vec2(visibleSize.width - 120, visibleSize.height - 120));
+	default0->setPosition(Vec2(visibleSize.width - 130, visibleSize.height - 180));
 	default0->setScale(0.5);
 	this->addChild(default0, 1);
 
@@ -72,6 +72,18 @@ bool CardScene::init()
 	targetCardType->setColor(Color3B::ORANGE);
 	this->addChild(targetCardName, 1);
 	this->addChild(targetCardType, 1);
+
+	// Also init opponent's Cards
+	int borderWidth = 70;
+	for (int i = 0; i < 13; i++) {
+		auto temp = Sprite::create("back.png");
+		temp->setScale(0.21);
+		temp->setPosition(Vec2(borderWidth, visibleSize.height - 5));
+		this->addChild(temp, 1);
+		borderWidth += 60;
+		opponentCards.push_back(temp);
+		OppOutFlag.push_back(false);
+	}
 	
 	return true;
 }
@@ -79,13 +91,13 @@ bool CardScene::init()
 void CardScene::initMyCards(vector<string> res) {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	// Init User's Cards
-	for (int i = 2; i < res.size(); i++) {
+	for (int i = 1; i < res.size(); i++) {
 		int id = Value(res[i]).asInt();
 		auto result = getCardByID(id);
 		string path0 = "characters/Decks/" + result->type + "/" + result->name + ".png";
 		auto temp = Sprite::create(path0);
-		cards.push_back(pair<int, Sprite*>(i - 2, temp));
-		cardNames.push_back(pair<int, string>(i - 2, result->name));
+		cards.push_back(pair<int, Sprite*>(i - 1, temp));
+		cardNames.push_back(pair<int, string>(i - 1, result->name));
 	}
 
 	// Show cards
@@ -101,7 +113,6 @@ void CardScene::initMyCards(vector<string> res) {
 		originPos.push_back(it->getPosition());
 		i++;
 	}
-
 }
 
 void CardScene::networkUpdate(float f) {
@@ -111,9 +122,7 @@ void CardScene::networkUpdate(float f) {
 		nowMsg = newMsg;
 		auto res = access0.split(nowMsg, "||");
 		if (res[0] == "deck") {
-			if (res[1] == myName) {
-				initMyCards(res);
-			}
+			initMyCards(res);
 		}
 	}
 }
@@ -206,6 +215,8 @@ void CardScene::addTouchListener() {
 bool CardScene::onTouchBegan(Touch *touch, Event *event) {
 	initAndCleanClick();
 	auto root = Director::sharedDirector()->getRunningScene();
+	if (cards.size() == 0)
+		return false;
 	for (int i = 0; i < 13; i++) {
 		Sprite* temp = (Sprite*)root->getChildByTag(i);
 		if (touch->getLocation().getDistance(temp->getPosition()) <= 40) {
@@ -219,6 +230,8 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 	int target = -1;
 	bool correctFlag = false;
 	auto visibleSize = Director::getInstance()->getVisibleSize();
+	if (cards.size() == 0)
+		return;
 	for (int i = 0; i < 13; i++) {
 		if (isClick[i]) {
 			target = i;
@@ -329,21 +342,42 @@ void CardScene::onMouseMoved(Event* e) {
 	EventMouse* ee = (EventMouse*)e;
 	auto root = Director::getInstance()->getRunningScene();
 	Vec2 pos = Vec2(ee->getCursorX(), ee->getCursorY());
-	for (int i = 0; i < 13; i++) {
-		Sprite* sp = (Sprite*)root->getChildByTag(i);
-		if (sp->getPosition().getDistance(pos) <= 40) {
-			if (!outFlag[i]) {
-				outFlag[i] = true;
-				auto animate = ScaleTo::create(1.0f, 0.20f, 0.20f);
-				sp->runAction(animate);
+	if (cards.size() == 13) {
+		for (int i = 0; i < 13; i++) {
+			Sprite* sp = (Sprite*)root->getChildByTag(i);
+			if (sp->getPosition().getDistance(pos) <= 40) {
+				if (!outFlag[i]) {
+					outFlag[i] = true;
+					auto animate = ScaleTo::create(1.0f, 0.20f, 0.20f);
+					sp->runAction(animate);
+				}
+			}
+			else {
+				if (outFlag[i]) {
+					auto animate = ScaleTo::create(1.0f, 0.17f, 0.17f);
+					sp->runAction(animate);
+				}
+				outFlag[i] = false;
 			}
 		}
-		else {
-			if (outFlag[i]) {
-				auto animate = ScaleTo::create(1.0f, 0.17f, 0.17f);
-				sp->runAction(animate);
+	}
+	if (opponentCards.size() == 13) {
+		for (int i = 0; i < 13; i++) {
+			auto oppoCard = opponentCards[i];
+			if (oppoCard->getPosition().getDistance(pos) <= 40) {
+				if (!OppOutFlag[i]) {
+					OppOutFlag[i] = true;
+					auto animate = ScaleTo::create(1.0f, 0.24f, 0.24f);
+					oppoCard->runAction(animate);
+				}
 			}
-			outFlag[i] = false;
+			else {
+				if (OppOutFlag[i]) {
+					auto animate = ScaleTo::create(1.0f, 0.21f, 0.21f);
+					oppoCard->runAction(animate);
+				}
+				OppOutFlag[i] = false;
+			}
 		}
 	}
 }
@@ -366,6 +400,8 @@ void CardScene::onMouseDown(Event* e) {
 	EventMouse* ee = (EventMouse*)e;
 	auto root = Director::getInstance()->getRunningScene();
 	Vec2 pos = Vec2(ee->getCursorX(), ee->getCursorY());
+	if (cards.size() == 0)
+		return;
 	for (int i = 0; i < 13; i++) {
 		Sprite* sp = (Sprite*)root->getChildByTag(i);
 		string name = cardNames[i].second;

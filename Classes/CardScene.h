@@ -6,6 +6,7 @@
 #include "json/rapidjson.h"
 #include "json/document.h"
 #include "NetWorkAccess.h"
+#include "MyDialog.h"
 #include <vector>
 
 using namespace cocos2d;
@@ -69,9 +70,11 @@ public:
 private:
 	vector<pair<int, Sprite*> > cards;
 	vector<pair<int, string> > cardNames;
+	vector<Sprite*> opponentCards;
 	vector<Vec2> originPos;
 	vector<bool> isClick;
 	vector<bool> outFlag;
+	vector<bool> OppOutFlag;
 	vector<bool> onBoard;
 	vector<int> lineCardNum;
 	vector<Card*> jsonDetails;
