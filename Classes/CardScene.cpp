@@ -105,15 +105,15 @@ void CardScene::initLines() {
 void CardScene::initJSONDetails() {
 	string data = FileUtils::getInstance()->getStringFromFile("json/cardset.json");
 	rapidjson::Document doc;
-	doc.Parse(data.data(), data.size());
-	auto test = doc.GetType();
-	if (doc.IsObject()) {
-		for (int i = 0; i < doc.Size(); i++) {
-			auto temp = doc[i].GetObjectW();
-			auto store = new Card(temp["attack"].GetInt(), temp["type"].GetString(), temp["name"].GetString(), temp["index"].GetInt());
-			jsonDetails.push_back(store);
-		}
-	}
+	doc.Parse(data.c_str());
+    printf("%s", data.data());
+	
+    auto cardArr = doc.GetArray();
+    auto test = cardArr.Size();
+    for (auto& obj : cardArr) {
+        auto store = new Card(obj["attack"].GetInt(), obj["type"].GetString(), obj["name"].GetString(), obj["index"].GetInt());
+        jsonDetails.push_back(store);
+    }
 }
 
 void CardScene::addTouchListener() {
