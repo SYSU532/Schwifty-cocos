@@ -320,6 +320,9 @@ wsServer.on('request', function(request){
                 }
                 else {
                     let returnMsg = `status`;
+                    returnMsg += `||${gameSessionArr[instructions[1]].UserOne}`;
+                    returnMsg += `||${gameSessionArr[instructions[1]].UserTwo}`;
+                    returnMsg += `||${gameSessionArr[instructions[1].currentPlayer]}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].wins1}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].wins2}`;
                     returnMsg += `||${gameSessionArr[instructions[1]].deckOne.length}`;

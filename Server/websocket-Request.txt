@@ -57,7 +57,7 @@ return:
 Get current session status 获取当前战局比分情况
     getStatus&&sessionKey
 return（win1和 win2分别为玩家1和玩家2当前的获胜局数，deck1和 deck2 分别为两玩家手牌数）:
-    status||win1||win2||deck1||deck2
+    status||user1||user2||currentPlayer||win1||win2||deck1||deck2
 
 Get ground 获取牌局上对应用户打出的牌：
     getGround&&sessionKey&&username
