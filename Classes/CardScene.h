@@ -71,6 +71,8 @@ private:
 	Sprite* bCoin;
 	Sprite* rCoin;
 	Sprite* default0;
+	Label* targetCardName;
+	Label* targetCardType;
 	bool coinState;
 
 };
