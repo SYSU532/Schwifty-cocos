@@ -139,7 +139,7 @@ void CardScene::networkUpdate(float f) {
 
 void CardScene::initLines() {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
-	int order_height = 98;
+	int order_height = 90;
 	for (int i = 0; i < 3; i++) {
 		auto sp1 = Sprite::create("line.png");
 		sp1->setPosition(Vec2(visibleSize.width / 2 - 40, order_height));
@@ -147,7 +147,7 @@ void CardScene::initLines() {
 		sp1->setName("line" + Value(i).asString());
 		sp1->setContentSize(Size(1000, sp1->getContentSize().height));
 		order_height += sp1->getContentSize().height - 65;
-		//sp1->setVisible(false);
+		sp1->setVisible(false);
 		this->addChild(sp1, 1);
 	}
 }
@@ -177,14 +177,19 @@ void CardScene::initPointLabels() {
 	// My Total labels
 	auto num1 = Sprite::create("characters/Numbers/number0.png");
 	auto num2 = Sprite::create("characters/Numbers/number0.png");
-	num1->setPosition(Vec2(42, visibleSize.height / 2 - 34));
-	num2->setPosition(Vec2(62, visibleSize.height / 2 - 34));
+	auto num3 = Sprite::create("characters/Numbers/number0.png");
+	num1->setPosition(Vec2(32, visibleSize.height / 2 - 34));
+	num2->setPosition(Vec2(52, visibleSize.height / 2 - 34));
+	num3->setPosition(Vec2(72, visibleSize.height / 2 - 34));
 	num1->setScale(0.6);
 	num2->setScale(0.6);
+	num3->setScale(0.6);
 	this->addChild(num1, 1);
 	this->addChild(num2, 1);
+	this->addChild(num3, 1);
 	allLabels.push_back(num1);
 	allLabels.push_back(num2);
+	allLabels.push_back(num3);
 
 	// Opponent point Labels
 	order_height = visibleSize.height / 2 + 60;
@@ -203,16 +208,21 @@ void CardScene::initPointLabels() {
 	}
 	// Opponent total labels
 	// My Total labels
-	auto num3 = Sprite::create("characters/Numbers/number0.png");
 	auto num4 = Sprite::create("characters/Numbers/number0.png");
-	num3->setPosition(Vec2(42, visibleSize.height / 2 + 87));
-	num4->setPosition(Vec2(62, visibleSize.height / 2 + 87));
-	num3->setScale(0.6);
+	auto num5 = Sprite::create("characters/Numbers/number0.png");
+	auto num6 = Sprite::create("characters/Numbers/number0.png");
+	num4->setPosition(Vec2(32, visibleSize.height / 2 + 87));
+	num5->setPosition(Vec2(52, visibleSize.height / 2 + 87));
+	num6->setPosition(Vec2(72, visibleSize.height / 2 + 87));
 	num4->setScale(0.6);
-	this->addChild(num3, 1);
+	num5->setScale(0.6);
+	num6->setScale(0.6);
 	this->addChild(num4, 1);
-	allLabels.push_back(num3);
+	this->addChild(num5, 1);
+	this->addChild(num6, 1);
 	allLabels.push_back(num4);
+	allLabels.push_back(num5);
+	allLabels.push_back(num6);
 }
 
 void CardScene::initGameDatas() {
@@ -324,11 +334,11 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 	}
 	for (int i = 0; i < 3; i++) {
 		auto temp = (Sprite*)root->getChildByName("line" + Value(i).asString());
-		auto judge_height = 80;
+		auto judge_height = 70;
 		if (i == 2)
-			judge_height = 60;
+			judge_height = 50;
 		else if (i == 0)
-			judge_height = 110;
+			judge_height = 100;
 		if (temp->getBoundingBox().containsPoint(cardPos->getPosition())) {
 			cardPos->setPosition(Vec2(visibleSize.width / 2 - 250 + lineCardNum[i]*60, judge_height + 100*i));
 			onBoard[target] = true;
@@ -368,24 +378,32 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 void CardScene::changePoints(int row, int point) {
 	MyLinePoints[row] += point;
 	myPoints += point;
-	int upOrDown = 0;
+	int upOrDown = 0, factor = 0;
+	if (row >= 3) {
+		upOrDown = 1;
+		factor = 3;
+	}
 	if (MyLinePoints[row] < 10) {
-		allLabels[row * 2 + 1]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(MyLinePoints[row]).asString() + ".png"));
+		allLabels[row * 2 + 1 + factor]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(MyLinePoints[row]).asString() + ".png"));
 	}
 	else {
 		int first = MyLinePoints[row] / 10, second = MyLinePoints[row] % 10;
-		allLabels[row * 2]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
-		allLabels[row * 2 + 1]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
+		allLabels[row * 2 + factor]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
+		allLabels[row * 2 + 1 + factor]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 	}
-	if (row >= 3)
-		upOrDown = 1;
 	if (myPoints < 10) {
-		allLabels[upOrDown * 7 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(myPoints).asString() + ".png"));
+		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(myPoints).asString() + ".png"));
+	}
+	else if(myPoints < 100){
+		int first = myPoints / 10, second = myPoints % 10;
+		allLabels[upOrDown * 8 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
+		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 	}
 	else {
-		int first = myPoints / 10, second = myPoints % 10;
-		allLabels[upOrDown * 6 + 6]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
-		allLabels[upOrDown * 7 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
+		int first = myPoints / 100, second = (myPoints - 100 * first) / 10, third = myPoints % 10;
+		allLabels[upOrDown * 8 + 6]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
+		allLabels[upOrDown * 8 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
+		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(third).asString() + ".png"));
 	}
 }
 
