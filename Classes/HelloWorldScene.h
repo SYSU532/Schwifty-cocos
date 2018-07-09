@@ -22,6 +22,7 @@ public:
 	void showRequestIcon();
 	void sendNetWorkRequest(Node* node);
 	void jumpToPlayCards(Node* node);
+	void acceptInvitation(Node* node);
 
 	void move(char c);
 
@@ -80,6 +81,7 @@ private:
 	vector<pair<string, bool> > gameRequests;
 	Sprite* book;
 	string targetUserName;
+	string requestUserName;
 	
 	// WebSocket Messages register
 	string msgType;

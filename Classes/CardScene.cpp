@@ -37,9 +37,26 @@ bool CardScene::init()
 	addTouchListener();
 	addMouseListener();
 
+	bCoin = Sprite::create("coin0.png");
+	rCoin = Sprite::create("coin1.png");
+	bCoin->setPosition(Vec2(visibleSize.width / 15 - 15, visibleSize.height / 2));
+	bCoin->setScale(0.16);
+	rCoin->setPosition(bCoin->getPosition());
+	rCoin->setScale(0, 0.16);
+	this->addChild(bCoin, 1);
+	this->addChild(rCoin, 1);
+
+	coinState = true;
+
 	initCards();
+	initJSONDetails();
 	initAndCleanClick();
 	initLines();
+
+	default0 = Sprite::create("default.png");
+	default0->setPosition(Vec2(visibleSize.width - 120, visibleSize.height - 120));
+	default0->setScale(0.5);
+	this->addChild(default0, 1);
 	
 	return true;
 }
@@ -48,29 +65,25 @@ void CardScene::initCards() {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	// Init User's Cards
 	for (int i = 0; i < 13; i++) {
-		auto temp = Sprite::create("Morty1.png");
-		cards.pushBack(temp);
+		auto temp = Sprite::create("characters/Decks/common/RabbitMorty.png");
+		cards.push_back(pair<int, Sprite*>(i, temp));
+		cardNames.push_back(pair<int, string>(i, "RabbitMorty"));
 	}
 
 
 	// Show cards
-	Vector<Sprite*>::iterator it = cards.begin();
 	int borderWidth = 70;
 	int i = 0;
-	for (; it != cards.end(); it++) {
-		(*it)->setScale(0.17);
-		(*it)->setPosition(Vec2(borderWidth, 20));
-		(*it)->setTag(i);
-		this->addChild((*it), 1);
+	for (auto item : cards) {
+		auto it = item.second;
+		it->setScale(0.17);
+		it->setPosition(Vec2(borderWidth, 20));
+		it->setTag(i);
+		this->addChild(it, 1);
 		borderWidth += 68;
-		originPos.push_back((*it)->getPosition());
+		originPos.push_back(it->getPosition());
 		i++;
 	}
-
-	auto test = Sprite::create("characters/Decks/common/Morty.png");
-	test->setPosition(Vec2(visibleSize.width - 120, visibleSize.height - 120));
-	test->setScale(0.5);
-	this->addChild(test, 1);
 
 }
 
@@ -86,6 +99,20 @@ void CardScene::initLines() {
 		order_height += sp1->getContentSize().height - 65;
 		sp1->setVisible(false);
 		this->addChild(sp1, 1);
+	}
+}
+
+void CardScene::initJSONDetails() {
+	string data = FileUtils::getInstance()->getStringFromFile("json/cardset.json");
+	rapidjson::Document doc;
+	doc.Parse(data.data(), data.size());
+	auto test = doc.GetType();
+	if (doc.IsObject()) {
+		for (int i = 0; i < doc.Size(); i++) {
+			auto temp = doc[i].GetObjectW();
+			auto store = new Card(temp["attack"].GetInt(), temp["type"].GetString(), temp["name"].GetString(), temp["index"].GetInt());
+			jsonDetails.push_back(store);
+		}
 	}
 }
 
@@ -141,6 +168,18 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 			originPos[target] = cardPos->getPosition();
 			correctFlag = true;
 			lineCardNum[i]++;
+			auto upMove = ScaleTo::create(0.5f, 0.16, 0.16), downMove = ScaleTo::create(0.5f, 0, 0.16);
+			if (coinState) {
+				bCoin->runAction(downMove);
+				rCoin->runAction(upMove);
+
+				coinState = false;
+			}
+			else {
+				bCoin->runAction(upMove);
+				rCoin->runAction(downMove);
+				coinState = true;
+			}
 		}
 	}
 	if (!correctFlag) {
@@ -158,11 +197,9 @@ void CardScene::onTouchMoved(Touch *touch, Event *event) {
 		if (isClick[i]) {
 			auto delta = touch->getDelta();
 			Sprite* temp = NULL;
-			Vector<Sprite*>::iterator it = cards.begin();
-			for (int j = 0; it != cards.end(); j++, it++) {
-				if (j == i) {
-					temp = *it;
-				}
+			for (auto& e : cards) {
+				if (e.first == i)
+					temp = e.second;
 			}
 			temp->setPosition(temp->getPosition() + delta);
 		}
@@ -184,6 +221,7 @@ void CardScene::initAndCleanClick() {
 
 void CardScene::addMouseListener() {
 	auto mouseListener = EventListenerMouse::create();
+	mouseListener->onMouseDown = CC_CALLBACK_1(CardScene::onMouseDown, this);
 	mouseListener->onMouseMove = CC_CALLBACK_1(CardScene::onMouseMoved, this);
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouseListener, this);
 }
@@ -207,6 +245,28 @@ void CardScene::onMouseMoved(Event* e) {
 				sp->runAction(animate);
 			}
 			outFlag[i] = false;
+		}
+	}
+}
+
+Card* CardScene::getCardByName(string cardname) {
+	for (auto e : jsonDetails) {
+		if (e->name == cardname)
+			return e;
+	}
+}
+
+void CardScene::onMouseDown(Event* e) {
+	EventMouse* ee = (EventMouse*)e;
+	auto root = Director::getInstance()->getRunningScene();
+	Vec2 pos = Vec2(ee->getCursorX(), ee->getCursorY());
+	for (int i = 0; i < 13; i++) {
+		Sprite* sp = (Sprite*)root->getChildByTag(i);
+		string name = cardNames[i].second;
+		Card* target = getCardByName(name);
+		if (sp->getPosition().getDistance(pos) <= 40) {
+			string path0 = "characters/Decks/" + target->type + "/" + target->name + ".png";
+			default0 = Sprite::create(path0);
 		}
 	}
 }

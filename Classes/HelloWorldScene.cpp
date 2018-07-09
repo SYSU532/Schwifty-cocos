@@ -175,15 +175,24 @@ void HelloWorld::networkUpdate(float f) {
 			if (res[0] == "reqAc") {
 				// Start Game
 				UserDefault::getInstance()->setStringForKey("sessionKey", res[2]);
+				targetUserName = res[1];
 				dp->setTitle("Are you ready?");
 				dp->chooseMode(4);
 				dp->setEnterCallBackFunc(this, callfuncN_selector(HelloWorld::jumpToPlayCards));
 				this->addChild(dp, 1);
-				dp->changeMsg("Ready to start Schwifty Cards ?", true);
+				dp->changeMsg(res[1] + " and you accept the competition,\n Ready to start Schwifty Cards ?", true);
 			}
 			else if (res[0] == "recReq") {
 				// Receive request from others
-
+				if (requestUserName == "")
+					requestUserName = res[1];
+				else if (requestUserName != res[1])
+					return;
+				dp->setTitle("Game Request");
+				dp->chooseMode(4);
+				dp->setEnterCallBackFunc(this, callfuncN_selector(HelloWorld::acceptInvitation));
+				this->addChild(dp, 1);
+				dp->changeMsg("Accept Invitation From " + res[1] + " ?\n" + res[1] + " has deck count: " + res[2], true);
 			}
 		}
 		else {
@@ -375,9 +384,15 @@ void HelloWorld::sendNetWorkRequest(Node* node) {
 }
 
 void HelloWorld::jumpToPlayCards(Node* node) {
+	UserDefault::getInstance()->setStringForKey("username", username);
+	UserDefault::getInstance()->setStringForKey("oppoUsername", targetUserName);
 	Scene* s = CardScene::createScene();
 	auto animate = TransitionFade::create(0.7f, s);
 	Director::getInstance()->replaceScene(animate);
+}
+
+void HelloWorld::acceptInvitation(Node* node) {
+	access0.AcceptInvitation(userKey, requestUserName);
 }
 
 void HelloWorld::move(char dir) {
