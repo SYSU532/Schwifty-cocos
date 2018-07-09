@@ -30,7 +30,7 @@ bool CardScene::init()
 		outFlag.push_back(false);
 		onBoard.push_back(false);
 	}
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		lineCardNum.push_back(0);
 	}
 
@@ -68,8 +68,8 @@ bool CardScene::init()
 	auto cardPos = default0->getPosition();
 	targetCardName = Label::createWithTTF(" ", "fonts/Marker Felt.ttf", 20);
 	targetCardType = Label::createWithTTF(" ", "fonts/Marker Felt.ttf", 16);
-	targetCardName->setPosition(Vec2(cardPos.x, cardPos.y - 240));
-	targetCardType->setPosition(Vec2(cardPos.x, cardPos.y - 190));
+	targetCardName->setPosition(Vec2(cardPos.x, cardPos.y - 200));
+	targetCardType->setPosition(Vec2(cardPos.x, cardPos.y - 150));
 	targetCardType->setColor(Color3B::ORANGE);
 	this->addChild(targetCardName, 1);
 	this->addChild(targetCardType, 1);
@@ -134,12 +134,28 @@ void CardScene::networkUpdate(float f) {
 				rCoin->setVisible(true);
 			}
 		}
+		else if (res.size() == 2) {
+			if (res[0] == "opPlay") {
+				addOppoCard(Value(res[1]).asInt());
+				coinState = true;
+				changeBoardState(true);
+				bCoin->setVisible(true);
+				rCoin->setVisible(false);
+			}
+			else if (res[0] == "play" && coinState == true) {
+				coinState = false;
+				changeBoardState(false);
+				bCoin->setVisible(false);
+				rCoin->setVisible(true);
+			}
+		}
 	}
 }
 
 void CardScene::initLines() {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
-	int order_height = 90;
+	int order_height = 85;
+	// Add My Lines
 	for (int i = 0; i < 3; i++) {
 		auto sp1 = Sprite::create("line.png");
 		sp1->setPosition(Vec2(visibleSize.width / 2 - 40, order_height));
@@ -150,6 +166,44 @@ void CardScene::initLines() {
 		sp1->setVisible(false);
 		this->addChild(sp1, 1);
 	}
+	// Add Opponent Lines
+	order_height = visibleSize.height / 2 + 50;
+	for (int i = 3; i < 6; i++) {
+		auto sp1 = Sprite::create("line.png");
+		sp1->setPosition(Vec2(visibleSize.width / 2 - 40, order_height));
+		sp1->setScale(0.5);
+		sp1->setName("line" + Value(i).asString());
+		sp1->setContentSize(Size(1000, sp1->getContentSize().height));
+		order_height += sp1->getContentSize().height - 65;
+		sp1->setVisible(false);
+		this->addChild(sp1, 1);
+	}
+}
+
+void CardScene::addOppoCard(int index) {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	auto root = Director::getInstance()->getRunningScene();
+	int oppoCardSize = opponentCards.size();
+	auto tt = opponentCards[oppoCardSize - 1];
+	opponentCards.pop_back();
+	tt->removeFromParentAndCleanup(true);
+	Card* target = getCardByID(index);
+	// Create show image
+	string path0 = "characters/" + target->type + "/" + target->name + ".png";
+	auto showTarget = Sprite::create(path0);
+	vector<string> type = { "normal", "epic", "exotic" };
+	int count = 3;
+	for (auto e : type) {
+		if (e == target->type)
+			break;
+		else
+			count++;
+	}
+	auto theLine = root->getChildByName("line" + Value(count).asString());
+	showTarget->setPosition(Vec2(visibleSize.width / 2 - 250 + lineCardNum[count] * 60, theLine->getPosition().y));
+	this->addChild(showTarget, 1);
+	lineCardNum[count]++;
+	changePoints(8 - count, target->attack);
 }
 
 void CardScene::initPointLabels() {
@@ -328,6 +382,7 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 	auto cardPos = (Sprite*)root->getChildByTag(target);
 	string name = cardNames[target].second;
 	Card* theCard = getCardByName(name);
+	vector<string> type = {"exotic","epic", "normal"};
 	if (onBoard[target] == true) {
 		cardPos->setPosition(originPos[target]);
 		return;
@@ -339,7 +394,7 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 			judge_height = 50;
 		else if (i == 0)
 			judge_height = 100;
-		if (temp->getBoundingBox().containsPoint(cardPos->getPosition())) {
+		if (temp->getBoundingBox().containsPoint(cardPos->getPosition()) && theCard->type == type[i]) {
 			cardPos->setPosition(Vec2(visibleSize.width / 2 - 250 + lineCardNum[i]*60, judge_height + 100*i));
 			onBoard[target] = true;
 			originPos[target] = cardPos->getPosition();
@@ -373,6 +428,12 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 		outFlag[i] = false;
 	}
 
+}
+
+void CardScene::playOutACard(int i) {
+	auto target = cardNames[i].second;
+	auto theCard = getCardByName(target);
+	access0.PlayOutaCard(sessionKey, theCard->index);
 }
 
 void CardScene::changePoints(int row, int point) {
@@ -423,6 +484,8 @@ void CardScene::changeBoardState(bool flag) {
 }
 
 void CardScene::onTouchMoved(Touch *touch, Event *event) {
+	if (coinState == false)
+		return;
 	for (int i = 0; i < 13; i++) {
 		if (isClick[i]) {
 			auto delta = touch->getDelta();

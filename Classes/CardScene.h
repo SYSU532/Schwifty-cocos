@@ -33,9 +33,8 @@ public:
 
 	// Play Cards Logic Functions
 	void initMyCards(vector<string> res);
-	void initOppoCards(vector<string> res);
-
-	void useCard(int index);
+	void playOutACard(int i);
+	void addOppoCard(int index);
 
 	// NetWork Listener
 	void networkUpdate(float f);

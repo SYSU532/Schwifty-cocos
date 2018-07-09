@@ -65,8 +65,8 @@ void NetWorkAccess::GetCurrentDecks(string sessionKey) {
 	m_wSocket->send(sendStr);
 }
 
-void NetWorkAccess::PlayOutaCard(string sessionKey, string cardIndex) {
-	string sendStr = "play&&" + sessionKey + "&&" + cardIndex;
+void NetWorkAccess::PlayOutaCard(string sessionKey, int cardIndex) {
+	string sendStr = "play&&" + sessionKey + "&&" + Value(cardIndex).asString();
 	m_wSocket->send(sendStr);
 	
 }
