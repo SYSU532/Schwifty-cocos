@@ -157,6 +157,7 @@ class GameSession {
                 this.endRound();
                 return {status: true, nextRound: true};
             }
+            this.currentPlayer = this.UserTwo;
             return {status: true, nextRound: false};
         }
         else if (this.currentPlayer === this.UserTwo && this.UserTwo === username) {
@@ -165,6 +166,7 @@ class GameSession {
                 this.endRound();
                 return {status: true, nextRound: true};
             }
+            this.currentPlayer = this.UserOne;
             return {status: true, nextRound: false};
         }
         else console.log(`Unexpected User: ${this.currentPlayer}, ${this.UserOne}, ${this.UserTwo}`);

@@ -46,6 +46,10 @@ end round 玩家本局不再出牌：
 return:
     (self)endRound||Success
     (opponent)opEndRound
+若都不出牌，则进入下一局，返回：
+    goNextRound
+若游戏结束，返回 winner:
+    winner||winnerUsername/Draw
 Error:
     err||msg
 
