@@ -460,6 +460,16 @@ wsServer.on('request', function(request){
         console.log("Error: " + conn.user);
         console.log(code);
         console.log(reason);
+        if (conn.id) {
+            delete connections[conn.id];
+        }
+        if (conn.user) {
+            console.log("Error: " + conn.user);
+            delete userLocations[conn.user];
+            for (let key in connections) {
+                connections[key].sendUTF('userLogOut||' + conn.user);
+            }
+        }
     });
 });
 
