@@ -214,9 +214,21 @@ void CardScene::initMyCards(vector<string> res) {
 
 void CardScene::networkUpdate(float f) {
 	string newMsg = access0.getMessage();
-	auto root = Director::getInstance()->getRunningScene();
+
 	if (nowMsg != newMsg) {
 		nowMsg = newMsg;
+
+		// Variables Definitions
+		auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
+			OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
+		auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
+			DelayTime::create(0.5), NULL);
+		auto visibleSize = Director::getInstance()->getVisibleSize();
+		// Test Animation
+		auto endAnimate = Sequence::create(Show::create(),
+			ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), ScaleTo::create(0.1, 0.5), NULL);
+		auto root = Director::getInstance()->getRunningScene();
+
 		auto res = access0.split(nowMsg, "||");
 		if (res[0] == "deck") {
 			initMyCards(res);
@@ -242,26 +254,42 @@ void CardScene::networkUpdate(float f) {
 			}
 		}
 		else if (res.size() == 2) {
-			auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
-				OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
-			auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
-				DelayTime::create(0.5), NULL);
 			if (res[0] == "opPlay") {
 				addOppoCard(Value(res[1]).asInt());
 				if (nowRoundState) {
+					myTurnSign->runAction(endAnimate);
 					coinState = true;
 					changeBoardState(true);
 					bCoin->runAction(upMove);
 					rCoin->runAction(downMove);
 				}
 			}
+			else if (res[0] == "play" && oppoRoundState == false) {
+				myTurnSign->runAction(endAnimate);
+			}
 		}
 		else if (res.size() == 1 && res[0] == "opEndRound") {
 			oppoRoundState = false;
+			auto oppoEndSign = Sprite::create("redSign.png");
+			auto oppoEndLabel = Label::create("Your opponent: " + oppoName + " has ended this round!", "fonts/Marker Felt.ttf", 35);
+			oppoEndSign->setPosition(visibleSize / 2);
+			oppoEndLabel->setPosition(oppoEndSign->getContentSize() / 2);
+			oppoEndSign->addChild(oppoEndLabel, 1);
+			this->addChild(oppoEndSign);
+			oppoEndSign->runAction(Sequence::create(endAnimate, CallFunc::create([oppoEndSign, this] {
+				oppoEndSign->removeFromParentAndCleanup(true);
+			}), nullptr));
 			if (nowRoundState == false) {
 				allEndThisRound();
 				access0.GetCurrentStatus(sessionKey);
 				startNewRound();
+			}
+			else {
+				myTurnSign->runAction(endAnimate);
+				coinState = true;
+				changeBoardState(true);
+				bCoin->runAction(upMove);
+				rCoin->runAction(downMove);
 			}
 		}
 	}
@@ -577,10 +605,12 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 			auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
 				DelayTime::create(0.5), NULL);
 
-			bCoin->runAction(downMove);
-			rCoin->runAction(upMove);
-			changeBoardState(false);
-			coinState = false;
+			if (oppoRoundState == true) {
+				bCoin->runAction(downMove);
+				rCoin->runAction(upMove);
+				changeBoardState(false);
+				coinState = false;
+			}
 		}
 	}
 	if (!correctFlag) {
