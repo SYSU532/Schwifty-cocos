@@ -50,9 +50,11 @@ bool CardScene::init()
 	schedule(schedule_selector(CardScene::networkUpdate), 0.02f, kRepeatForever, 0);
 
 	nowMsg = "";
+	nowRoundState = true;
 	sessionKey = UserDefault::getInstance()->getStringForKey("sessionKey");
 	access0.GetCurrentDecks(sessionKey);
 	coinState = true;
+	roundNum = 1;
 
 	initGameDatas();
 	initJSONDetails();
@@ -64,6 +66,32 @@ bool CardScene::init()
 	default0->setPosition(Vec2(visibleSize.width - 130, visibleSize.height - 180));
 	default0->setScale(0.5);
 	this->addChild(default0, 1);
+
+	auto endRoundLabel = Label::createWithTTF("You have ended This Round!", "fonts/Marker Felt.ttf", 35);
+	auto myTurnLabel = Label::createWithTTF("Your Turn to play out a Morty Card!", "fonts/Marker Felt.ttf", 35);
+	endRoundSign = Sprite::create("blueSign.png");
+	myTurnSign = Sprite::create("blueSign.png");
+	endRoundSign->setPosition(visibleSize / 2);
+	myTurnSign->setPosition(visibleSize / 2);
+	endRoundLabel->setPosition(endRoundSign->getContentSize() / 2);
+	myTurnLabel->setPosition(myTurnSign->getContentSize() / 2);
+	endRoundSign->setScale(0.5);
+	myTurnSign->setScale(0.5);
+	endRoundSign->addChild(endRoundLabel, 1);
+	myTurnSign->addChild(myTurnLabel, 1);
+	endRoundSign->setVisible(false);
+	myTurnSign->setVisible(false);
+	this->addChild(endRoundSign, 1);
+
+	auto endBtn = MenuItemImage::create("endBtn0.png", "endBtn.png", CC_CALLBACK_1(CardScene::endMyRound, this));
+	endBtn->setPosition(Vec2(visibleSize.width - 120, 100));
+	endBtn->setScale(0.4);
+	auto endLabel = Label::createWithTTF("End Your Round", "fonts/Marker Felt.ttf", 40);
+	endLabel->setPosition(Vec2(endBtn->getContentSize().width / 2, endBtn->getContentSize().height / 2 - 10));
+	endBtn->addChild(endLabel, 1);
+	auto menu = Menu::create(endBtn, NULL);
+	menu->setPosition(Vec2::ZERO);
+	this->addChild(menu, 1);
 
 	auto cardPos = default0->getPosition();
 	targetCardName = Label::createWithTTF(" ", "fonts/Marker Felt.ttf", 20);
@@ -85,12 +113,72 @@ bool CardScene::init()
 		opponentCards.push_back(temp);
 		OppOutFlag.push_back(false);
 	}
-	
+
+	// Adding Trash Cards
+	myTrash = Sprite::create("trash.png");
+	oppoTrash = Sprite::create("trash.png");
+	myTrash->setPosition(Vec2(visibleSize.width - 60, 10));
+	oppoTrash->setPosition(Vec2(visibleSize.width - 60, visibleSize.height - 10));
+	myTrash->setScale(0.8);
+	oppoTrash->setScale(0.8);
+	this->addChild(myTrash, 1);
+	this->addChild(oppoTrash, 1);
+
 	return true;
+}
+
+void CardScene::endMyRound(Ref* r) {
+	if (!coinState)
+		return;
+	access0.EndRound(sessionKey);
+	nowRoundState = false; // User End this Round
+	// Test Animation
+	auto endAnimate = Sequence::create(Show::create(),
+		ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), ScaleTo::create(0.1, 0.5), NULL);
+	endRoundSign->runAction(endAnimate);
+
+}
+
+void CardScene::endCardScene() {
+
+}
+
+void CardScene::startNewRound() {
+	if (roundNum < 3)
+		roundNum++;
+	// Clear All Cards On Board
+	for (auto& it : lineCardNum) {
+		it = 0;
+	}
+	// Show Card Trashing Animation
+	for (auto& oppoC : oppoBoardCards) {
+		auto animation = Sequence::create(MoveTo::create(1.0f, oppoTrash->getPosition()), FadeOut::create(0.3f), NULL);
+		oppoC->runAction(Sequence::create(animation, CallFunc::create([oppoC, this] {
+			oppoC->removeFromParentAndCleanup(true);
+		}), nullptr));
+	}
+	oppoBoardCards.clear();
+	for (auto& myC : myBoardCards) {
+		auto animation = Sequence::create(MoveTo::create(1.0f, oppoTrash->getPosition()), FadeOut::create(0.3f), NULL);
+		myC->runAction(Sequence::create(animation, CallFunc::create([myC, this] {
+			myC->removeFromParentAndCleanup(true);
+		}), nullptr));
+	}
+	myBoardCards.clear();
+	// Clean Points and Label Values
+	myPoints = oppoPoints = 0;
+	for (auto itt : MyLinePoints) {
+		itt = 0;
+	}
+	for (auto& sp : allLabels) {
+		sp->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number0.png"));
+	}
+	default0->setTexture(Director::getInstance()->getTextureCache()->addImage("default.png"));
 }
 
 void CardScene::initMyCards(vector<string> res) {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
+	handCardsNum = 13;
 	// Init User's Cards
 	for (int i = 1; i < res.size(); i++) {
 		int id = Value(res[i]).asInt();
@@ -127,29 +215,101 @@ void CardScene::networkUpdate(float f) {
 			access0.GetCurrentStatus(sessionKey);
 		}
 		else if (res[0] == "status") {
+			int win1 = Value(res[4]).asInt(), win2 = Value(res[5]).asInt();
+			int deck1 = Value(res[6]).asInt(), deck2 = Value(res[7]).asInt();
 			if (res[1] != myName && Value(res[4]).asInt() == 0 && Value(res[5]).asInt() == 0) {
 				coinState = false;
 				changeBoardState(false);
 				bCoin->setVisible(false);
 				rCoin->setVisible(true);
 			}
+			if (win1 + win2 == 3) {
+				// Show result and Jump out
+				endCardScene();
+			}
+			else if (deck1 == 0 && deck2 == 0) {
+				// Show running out of cards and result, Jump Out
+
+				endCardScene();
+			}
 		}
 		else if (res.size() == 2) {
+			auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
+				OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
+			auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
+				DelayTime::create(0.5), NULL);
 			if (res[0] == "opPlay") {
 				addOppoCard(Value(res[1]).asInt());
-				coinState = true;
-				changeBoardState(true);
-				bCoin->setVisible(true);
-				rCoin->setVisible(false);
+				if (nowRoundState) {
+					coinState = true;
+					changeBoardState(true);
+					bCoin->runAction(upMove);
+					rCoin->runAction(downMove);
+				}
 			}
-			else if (res[0] == "play" && coinState == true) {
-				coinState = false;
-				changeBoardState(false);
-				bCoin->setVisible(false);
-				rCoin->setVisible(true);
+		}
+		else if (res.size() == 1 && res[0] == "opEndRound") {
+			oppoRoundState = false;
+			if (nowRoundState == false) {
+				allEndThisRound();
+				access0.GetCurrentStatus(sessionKey);
+				startNewRound();
 			}
 		}
 	}
+}
+
+void CardScene::allEndThisRound() {
+	// Show Round ending and decide who wins
+	// Init Points and cards
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	nowRoundState = true;
+	oppoRoundState = true;
+	string roundMess = "";
+	string roundNumber = Value(roundNum).asString();
+	string points = Value(myPoints).asString() + " : " + Value(oppoPoints).asString();
+	if (myPoints > oppoPoints) {
+		roundMess = "Round " + roundNumber + " End! You Fail";
+	}
+	else if (myPoints == oppoPoints) {
+		roundMess = "Round " + roundNumber + " End! It's A Tie";
+	}
+	else {
+		roundMess = "Round " + roundNumber + " End! You Win";
+	}
+	// Show Labels And Points
+	auto showLabel = Label::createWithTTF("You Win This Round", "fonts/Marker Felt.ttf", 30);
+	auto showPoints = Label::createWithTTF(points, "fonts/Marker Felt.ttf", 40);
+	auto showBox = Sprite::create("pointsShow.png");
+	auto blueStar = Sprite::create("blueStar.png");
+	blueStar->setScale(0.4);
+	auto redStar = Sprite::create("redStar.png");
+	redStar->setScale(0.4);
+
+	showLabel->setPosition(showBox->getContentSize() / 2);
+	blueStar->setPosition(Vec2(showBox->getContentSize().width / 4, showBox->getContentSize().height / 2 - 80));
+	redStar->setPosition(Vec2(showBox->getContentSize().width / 2 + 150, showBox->getContentSize().height / 2 - 80));
+	showPoints->setPosition(Vec2(showBox->getContentSize().width / 2, blueStar->getPosition().y));
+	showBox->addChild(showLabel, 1);
+	showBox->addChild(blueStar, 1);
+	showBox->addChild(redStar, 1);
+	showBox->addChild(showPoints, 1);
+	showBox->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 + 20));
+	showBox->setScale(0.6);
+	this->addChild(showBox);
+
+	auto showPointsAnimate = Sequence::create(Show::create(),
+		ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), NULL);
+	showBox->runAction(Sequence::create(showPointsAnimate, CallFunc::create([showBox, this] {
+		showBox->removeFromParentAndCleanup(true);
+	}), nullptr));
+
+}
+
+void CardScene::showMyTurnSign() {
+	auto showAnimate = Sequence::create(Show::create(),
+		ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), ScaleTo::create(0.1, 0.5), NULL);
+	myTurnSign->runAction(showAnimate);
 }
 
 void CardScene::initLines() {
@@ -204,6 +364,7 @@ void CardScene::addOppoCard(int index) {
 	showTarget->setPosition(Vec2(visibleSize.width / 2 - 250 + lineCardNum[count] * 60, theLine->getPosition().y));
 	this->addChild(showTarget, 1);
 	lineCardNum[count]++;
+	oppoBoardCards.push_back(showTarget);
 	changePoints(count, target->attack);
 }
 
@@ -401,24 +562,17 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 			originPos[target] = cardPos->getPosition();
 			correctFlag = true;
 			lineCardNum[i]++;
+			myBoardCards.push_back(cardPos);
 			changePoints(2-i, theCard->attack);
 			auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
 				OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
 			auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
 				DelayTime::create(0.5), NULL);
 
-			if (coinState) {
-				bCoin->runAction(downMove);
-				rCoin->runAction(upMove);
-				changeBoardState(false);
-				coinState = false;
-			}
-			else {
-				bCoin->runAction(upMove);
-				rCoin->runAction(downMove);
-				changeBoardState(true);
-				coinState = true;
-			}
+			bCoin->runAction(downMove);
+			rCoin->runAction(upMove);
+			changeBoardState(false);
+			coinState = false;
 		}
 	}
 	if (!correctFlag) {
@@ -432,6 +586,11 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 }
 
 void CardScene::playOutACard(int i) {
+	handCardsNum--;
+	if (handCardsNum == 0) {
+		nowRoundState = false;
+		access0.EndRound(sessionKey);
+	}
 	auto target = cardNames[i].second;
 	auto theCard = getCardByName(target);
 	access0.PlayOutaCard(sessionKey, theCard->index);
@@ -460,18 +619,18 @@ void CardScene::changePoints(int row, int point) {
 		allLabels[row * 2 + 1 + factor]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 	}
 	if (temp < 10) {
-		allLabels[upOrDown * 8 + 9]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(myPoints).asString() + ".png"));
+		allLabels[upOrDown * 9 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(myPoints).asString() + ".png"));
 	}
 	else if(temp < 100){
 		int first = temp / 10, second = temp % 10;
-		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
-		allLabels[upOrDown * 8 + 9]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
+		allLabels[upOrDown * 9 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
+		allLabels[upOrDown * 9 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 	}
 	else {
 		int first = temp / 100, second = (temp - 100 * first) / 10, third = temp % 10;
-		allLabels[upOrDown * 8 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
-		allLabels[upOrDown * 8 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
-		allLabels[upOrDown * 8 + 9]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(third).asString() + ".png"));
+		allLabels[upOrDown * 9 + 6]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(first).asString() + ".png"));
+		allLabels[upOrDown * 9 + 7]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
+		allLabels[upOrDown * 9 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(third).asString() + ".png"));
 	}
 }
 

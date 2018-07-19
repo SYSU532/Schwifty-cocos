@@ -35,6 +35,11 @@ public:
 	void initMyCards(vector<string> res);
 	void playOutACard(int i);
 	void addOppoCard(int index);
+	void endMyRound(Ref* e);
+	void showMyTurnSign();
+	void allEndThisRound();
+	void startNewRound();
+	void endCardScene();
 
 	// NetWork Listener
 	void networkUpdate(float f);
@@ -81,11 +86,17 @@ private:
 	vector<int> MyLinePoints; // 0 1 2 | 3 4 5
 	vector<Card*> jsonDetails;
 	vector<Sprite*> allLabels;
+	vector<Sprite*> myBoardCards;
+	vector<Sprite*> oppoBoardCards;
 
 	// Coin characters And Scale animations
 	Sprite* bCoin;
 	Sprite* rCoin;
 	Sprite* default0;
+	Sprite* endRoundSign;
+	Sprite* myTurnSign;
+	Sprite* myTrash;
+	Sprite* oppoTrash;
 	Label* targetCardName;
 	Label* targetCardType;
 	bool coinState;
@@ -102,9 +113,13 @@ private:
 	int oppoRickType;
 	int myPoints;
 	int oppoPoints;
+	int handCardsNum;
 
 	// NetWork Message
 	string nowMsg;
+	bool nowRoundState;
+	bool oppoRoundState;
+	int roundNum;
 
 };
 

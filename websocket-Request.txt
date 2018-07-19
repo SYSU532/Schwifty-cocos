@@ -1,0 +1,78 @@
+Login:
+    login&&username&&password
+will return:
+    loginAcc||KeyStr
+
+game session request 游戏邀请:
+    gameReq&&key&&targetUsername
+if 对方不在线, server will send:
+    reqDec||User not online
+
+Accept a request 接受邀请:
+    accReq&&key&&senderUsername
+Server will send to 邀请的双方:
+    reqAc||opponentUsername||gameSessionKey
+
+When receiving a request, server will send接收到邀请:
+    recReq||senderUsername||senderDeckCount
+
+Get all request获取当前用户所有邀请:
+    allReq&&key
+return:
+    allReq||senderUsername||senderDeckCount||......
+
+Get current deck 获取当前卡组：
+    getDeck&&sessionKey
+return:
+    deck||id||id||...
+
+Get all deck 获取用户所有卡组：
+    getAllDeck&&username
+return:
+    allDeck||username||id||id||...
+
+Play a card打出一张牌:
+    play&&sessionKey&&index
+return:
+    (self)play||Success
+    (opponent)opPlay||index
+Error:
+    err||msg
+
+end round 玩家本局不再出牌：
+    endRound&&sessionKey
+return:
+    (self)endRound||Success
+    (opponent)opEndRound
+Error:
+    err||msg
+
+Get attack point 获取当前局指定玩家的攻击点数：
+    attackPt&&sessionKey&&username
+return:
+    attackPt||usernane||normal||epic||exotic||total
+
+Get current session status 获取当前战局比分情况
+    getStatus&&sessionKey
+return（win1和 win2分别为玩家1和玩家2当前的获胜局数，deck1和 deck2 分别为两玩家手牌数）:
+    status||win1||win2||deck1||deck2
+
+Get ground 获取牌局上对应用户打出的牌：
+    getGround&&sessionKey&&username
+return(三个 weight 依次为 normal，epic，exotic 行的权值,若对应玩家本局不再出牌，则 end 为 true，否则为 false):
+    ground||username||end||weight1||weight2||weight3||id||id||...
+
+Update location更新用户位置：
+    update&&sessionKey&&rickType&&x&&y
+Other User will receive:
+    newLoc||username||rickType||x||y
+if it's the first time this user update the position:
+    newUsr||username||rickType||x||y
+
+Get all User Locations获取所有用户位置:
+    allLoc
+return:
+    locs||username1||rick1||x1||y1||user2||rick2||x2||y2||...
+
+Server warning:
+    err||message
