@@ -223,6 +223,8 @@ void CardScene::startNewRound() {
 		bCoin->runAction(downMove);
 		rCoin->runAction(upMove);
 	}
+	nowRoundState = true;
+	oppoRoundState = true;
 }
 
 void CardScene::initMyCards(vector<string> res) {
