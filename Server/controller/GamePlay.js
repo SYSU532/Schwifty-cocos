@@ -145,12 +145,13 @@ class GameSession {
     endRound() {
         this.stop1 = false;
         this.stop2 = false;
-        if (this.ground2.TotalAttck >= this.ground1.TotalAttck) {
+        if (this.ground2.TotalAttack >= this.ground1.TotalAttack) {
             this.wins2++;
         }
-        if (this.ground1.TotalAttck >= this.ground2.TotalAttck) {
+        if (this.ground1.TotalAttack >= this.ground2.TotalAttack) {
             this.wins1++;
         }
+        console.log(`Round end, ${this.ground1.TotalAttack}, ${this.ground2.TotalAttack}`);
         this.currentRound++;
         this.ground1.clear();
         this.ground2.clear();
@@ -181,7 +182,7 @@ class GameSession {
 
     playCard(username, cardIndex) {
         cardIndex = parseInt(cardIndex);
-        if (this.currentRound > 3) {
+        if (this.currentRound > 3 || this.Winner !== "Unknown") {
             return {status: false, msg: 'Session is already over.'};
         }
         if (this.currentPlayer === this.UserOne && this.UserOne === username) {
