@@ -17,7 +17,7 @@ bool CardScene::init()
 	}
 
 	Director::getInstance()->getOpenGLView()->setFrameSize(1400, 850);
-	auto visibleSize = Director::getInstance()->getVisibleSize();
+	visibleSize = Director::getInstance()->getVisibleSize();
 	auto origin = Director::getInstance()->getVisibleOrigin();
 	
 	auto bg = Sprite::create("board.png");
@@ -63,6 +63,7 @@ bool CardScene::init()
 	initAndCleanClick();
 	initLines();
 	initPointLabels();
+	preloadMusic();
 
 	default0 = Sprite::create("default.png");
 	default0->setPosition(Vec2(visibleSize.width - 130, visibleSize.height - 180));
@@ -127,7 +128,20 @@ bool CardScene::init()
 	this->addChild(myTrash, 1);
 	this->addChild(oppoTrash, 1);
 
+	myOriginFirst = true;
+
 	return true;
+}
+
+void CardScene::preloadMusic() {
+	myAudio = SimpleAudioEngine::getInstance();
+	myAudio->preloadEffect("music/kick.mp3");
+	myAudio->preloadBackgroundMusic("music/victory.mp3");
+	myAudio->preloadBackgroundMusic("music/defeat.mp3");
+	myAudio->preloadBackgroundMusic("music/play.mp3");
+	// Change Background music
+	myAudio->playBackgroundMusic("music/play.mp3", true);
+	myAudio->setBackgroundMusicVolume(0.7);
 }
 
 void CardScene::endMyRound(Ref* r) {
@@ -151,7 +165,9 @@ void CardScene::endMyRound(Ref* r) {
 }
 
 void CardScene::endCardScene() {
-
+	auto back = HelloWorld::createScene();
+	auto animation = TransitionFade::create(0.7f, back);
+	Director::getInstance()->replaceScene(animation);
 }
 
 void CardScene::startNewRound() {
@@ -170,7 +186,7 @@ void CardScene::startNewRound() {
 	}
 	oppoBoardCards.clear();
 	for (auto& myC : myBoardCards) {
-		auto animation = Sequence::create(MoveTo::create(1.0f, oppoTrash->getPosition()), FadeOut::create(0.3f), NULL);
+		auto animation = Sequence::create(MoveTo::create(1.0f, myTrash->getPosition()), FadeOut::create(0.3f), NULL);
 		myC->runAction(Sequence::create(animation, CallFunc::create([myC, this] {
 			myC->removeFromParentAndCleanup(true);
 		}), nullptr));
@@ -185,10 +201,27 @@ void CardScene::startNewRound() {
 		sp->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number0.png"));
 	}
 	default0->setTexture(Director::getInstance()->getTextureCache()->addImage("default.png"));
+
+	auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
+		OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
+	auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
+		DelayTime::create(0.5), NULL);
+
+	if (myOriginFirst) {
+		coinState = true;
+		changeBoardState(true);
+		bCoin->runAction(upMove);
+		rCoin->runAction(downMove);
+	}
+	else {
+		coinState = false;
+		changeBoardState(false);
+		bCoin->runAction(downMove);
+		rCoin->runAction(upMove);
+	}
 }
 
 void CardScene::initMyCards(vector<string> res) {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
 	handCardsNum = 13;
 	// Init User's Cards
 	for (int i = 1; i < res.size(); i++) {
@@ -226,7 +259,6 @@ void CardScene::networkUpdate(float f) {
 			OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
 		auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
 			DelayTime::create(0.5), NULL);
-		auto visibleSize = Director::getInstance()->getVisibleSize();
 		// Test Animation
 		auto endAnimate = Sequence::create(Show::create(),
 			ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), ScaleTo::create(0.1, 0.5), NULL);
@@ -240,22 +272,26 @@ void CardScene::networkUpdate(float f) {
 		else if (res[0] == "status") {
 			int win1 = Value(res[4]).asInt(), win2 = Value(res[5]).asInt();
 			int deck1 = Value(res[6]).asInt(), deck2 = Value(res[7]).asInt();
-			if (res[1] != myName && Value(res[4]).asInt() == 0 && Value(res[5]).asInt() == 0) {
-				coinState = false;
-				changeBoardState(false);
-				bCoin->setVisible(false);
-				rCoin->setVisible(true);
-			}
-			else {
-				myTurnSign->runAction(endAnimate);
+			if (Value(res[4]).asInt() == 0 && Value(res[5]).asInt() == 0) {
+				if (res[1] != myName) {
+					coinState = false;
+					myOriginFirst = false;
+					changeBoardState(false);
+					bCoin->setVisible(false);
+					rCoin->setVisible(true);
+				}
+				else {
+					showMyTurnSign();
+				}
 			}
 			if (win1 + win2 == 3) {
 				// Show result and Jump out
+				judgeAndShow(win1, win2);
 				endCardScene();
 			}
 			else if (deck1 == 0 && deck2 == 0) {
 				// Show running out of cards and result, Jump Out
-
+				judgeAndShow(win1, win2);
 				endCardScene();
 			}
 		}
@@ -271,10 +307,11 @@ void CardScene::networkUpdate(float f) {
 				}
 			}
 			else if (res[0] == "play" && oppoRoundState == false) {
-				myTurnSign->runAction(endAnimate);
+				showMyTurnSign();
 			}
 		}
 		else if (res.size() == 1) {
+			access0.GetCurrentStatus(sessionKey);
 			if (res[0] == "opEndRound") {
 				oppoRoundState = false;
 				auto oppoEndSign = Sprite::create("redSign.png");
@@ -302,10 +339,44 @@ void CardScene::networkUpdate(float f) {
 	}
 }
 
+void CardScene::judgeAndShow(int win1, int win2) {
+	string endingMess = "";
+	auto victory = Sprite::create("victory.png");
+	auto defeat = Sprite::create("defeat.png");
+	auto tie = Sprite::create("tie.png");
+	auto endAnimate = Sequence::create(Show::create(),
+		ScaleTo::create(0.3, 0.8), DelayTime::create(1.5), Hide::create(), NULL);
+
+	if (!myOriginFirst) {
+		int temp = win2;
+		win2 = win1;
+		win1 = temp;
+	}
+	if (win1 > win2) {
+		victory->setScale(0.5);
+		victory->setPosition(visibleSize / 2);
+		this->addChild(victory);
+		victory->runAction(endAnimate);
+		myAudio->playEffect("music/victory.mp3");
+	}
+	else if(win1 < win2){
+		defeat->setScale(0.5);
+		defeat->setPosition(visibleSize / 2);
+		this->addChild(defeat);
+		defeat->runAction(endAnimate);
+		myAudio->playEffect("music/defeat.mp3");
+	}
+	else {
+		tie->setScale(0.5);
+		tie->setPosition(visibleSize / 2);
+		this->addChild(tie);
+		tie->runAction(endAnimate);
+	}
+}
+
 void CardScene::allEndThisRound() {
 	// Show Round ending and decide who wins
 	// Init Points and cards
-	auto visibleSize = Director::getInstance()->getVisibleSize();
 	nowRoundState = true;
 	oppoRoundState = true;
 	string roundMess = "";
@@ -321,7 +392,7 @@ void CardScene::allEndThisRound() {
 		roundMess = "Round " + roundNumber + " End! You Win";
 	}
 	// Show Labels And Points
-	auto showLabel = Label::createWithTTF("You Win This Round", "fonts/Marker Felt.ttf", 30);
+	auto showLabel = Label::createWithTTF(roundMess, "fonts/Marker Felt.ttf", 30);
 	auto showPoints = Label::createWithTTF(points, "fonts/Marker Felt.ttf", 40);
 	auto showBox = Sprite::create("pointsShow.png");
 	auto blueStar = Sprite::create("blueStar.png");
@@ -356,7 +427,6 @@ void CardScene::showMyTurnSign() {
 }
 
 void CardScene::initLines() {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
 	int order_height = 85;
 	// Add My Lines
 	for (int i = 0; i < 3; i++) {
@@ -384,7 +454,6 @@ void CardScene::initLines() {
 }
 
 void CardScene::addOppoCard(int index) {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto root = Director::getInstance()->getRunningScene();
 	int oppoCardSize = opponentCards.size();
 	auto tt = opponentCards[oppoCardSize - 1];
@@ -412,7 +481,6 @@ void CardScene::addOppoCard(int index) {
 }
 
 void CardScene::initPointLabels() {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
 	myPoints = oppoPoints = 0;
 	for (int i = 0; i < 6; i++) {
 		MyLinePoints.push_back(0);
@@ -484,7 +552,6 @@ void CardScene::initPointLabels() {
 }
 
 void CardScene::initGameDatas() {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
 	myName = UserDefault::getInstance()->getStringForKey("username");
 	oppoName = UserDefault::getInstance()->getStringForKey("oppoUsername");
 	string path = myName + "_head";
@@ -632,6 +699,8 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 
 void CardScene::playOutACard(int i) {
 	handCardsNum--;
+	// Play effect
+	myAudio->playEffect("music/kick.mp3");
 	if (handCardsNum == 0) {
 		nowRoundState = false;
 		access0.EndRound(sessionKey);
@@ -737,6 +806,8 @@ void CardScene::onMouseMoved(Event* e) {
 	if (cards.size() == 13) {
 		for (int i = 0; i < 13; i++) {
 			Sprite* sp = (Sprite*)root->getChildByTag(i);
+			if (sp == NULL)
+				continue;
 			if (sp->getPosition().getDistance(pos) <= 40) {
 				if (!outFlag[i]) {
 					outFlag[i] = true;

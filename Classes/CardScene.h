@@ -7,9 +7,12 @@
 #include "json/document.h"
 #include "NetWorkAccess.h"
 #include "MyDialog.h"
+#include "HelloWorldScene.h"
+#include "SimpleAudioEngine.h"
 #include <vector>
 
 using namespace cocos2d;
+using namespace CocosDenshion;
 using namespace std;
 
 struct Card {
@@ -39,6 +42,7 @@ public:
 	void showMyTurnSign();
 	void allEndThisRound();
 	void startNewRound();
+	void judgeAndShow(int win1, int win2);
 	void endCardScene();
 
 	// NetWork Listener
@@ -58,6 +62,9 @@ public:
 	void addTouchListener();
 	void addMouseListener();
 
+	// Game Music Handler
+	void preloadMusic();
+
 	// Board Rules
 	void initLines();
 	void initGameDatas();
@@ -74,6 +81,9 @@ public:
 	CREATE_FUNC(CardScene);
 
 private:
+	Size visibleSize;
+	SimpleAudioEngine* myAudio;
+
 	vector<pair<int, Sprite*> > cards;
 	vector<pair<int, string> > cardNames;
 	vector<Sprite*> opponentCards;
@@ -100,6 +110,7 @@ private:
 	Label* targetCardName;
 	Label* targetCardType;
 	bool coinState;
+	bool myOriginFirst;
 
 	// Basic Infos of Users
 	ParticleSystem* myBlueBoardLeft;
