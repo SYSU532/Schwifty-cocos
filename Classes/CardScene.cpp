@@ -55,6 +55,8 @@ bool CardScene::init()
 	access0.GetCurrentDecks(sessionKey);
 	coinState = true;
 	roundNum = 1;
+	nowRoundState = true;
+	oppoRoundState = true;
 
 	initGameDatas();
 	initJSONDetails();
@@ -82,6 +84,7 @@ bool CardScene::init()
 	endRoundSign->setVisible(false);
 	myTurnSign->setVisible(false);
 	this->addChild(endRoundSign, 1);
+	this->addChild(myTurnSign, 1);
 
 	auto endBtn = MenuItemImage::create("endBtn0.png", "endBtn.png", CC_CALLBACK_1(CardScene::endMyRound, this));
 	endBtn->setPosition(Vec2(visibleSize.width - 120, 100));
@@ -242,6 +245,9 @@ void CardScene::networkUpdate(float f) {
 				changeBoardState(false);
 				bCoin->setVisible(false);
 				rCoin->setVisible(true);
+			}
+			else {
+				myTurnSign->runAction(endAnimate);
 			}
 			if (win1 + win2 == 3) {
 				// Show result and Jump out
