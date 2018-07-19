@@ -311,7 +311,6 @@ void CardScene::networkUpdate(float f) {
 			}
 		}
 		else if (res.size() == 1) {
-			access0.GetCurrentStatus(sessionKey);
 			if (res[0] == "opEndRound") {
 				oppoRoundState = false;
 				auto oppoEndSign = Sprite::create("redSign.png");
