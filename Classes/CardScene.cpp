@@ -153,6 +153,10 @@ void CardScene::endMyRound(Ref* r) {
 		DelayTime::create(0.5), NULL);
 	access0.EndRound(sessionKey);
 	nowRoundState = false; // User End this Round
+	if (oppoRoundState == false)
+		myOriginFirst = true;
+	else
+		myOriginFirst = false;
 	coinState = false;
 	changeBoardState(false);
 	bCoin->runAction(downMove);
