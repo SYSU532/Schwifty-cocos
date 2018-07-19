@@ -88,10 +88,10 @@ bool CardScene::init()
 	this->addChild(myTurnSign, 1);
 
 	auto endBtn = MenuItemImage::create("endBtn0.png", "endBtn.png", CC_CALLBACK_1(CardScene::endMyRound, this));
-	endBtn->setPosition(Vec2(visibleSize.width - 120, 100));
-	endBtn->setScale(0.4);
+	endBtn->setPosition(Vec2(visibleSize.width - 120, 110));
+	endBtn->setScale(0.34);
 	auto endLabel = Label::createWithTTF("End Your Round", "fonts/Marker Felt.ttf", 40);
-	endLabel->setPosition(Vec2(endBtn->getContentSize().width / 2, endBtn->getContentSize().height / 2 - 6));
+	endLabel->setPosition(Vec2(endBtn->getContentSize().width / 2, endBtn->getContentSize().height / 2));
 	endBtn->addChild(endLabel, 1);
 	auto menu = Menu::create(endBtn, NULL);
 	menu->setPosition(Vec2::ZERO);
@@ -744,7 +744,7 @@ void CardScene::changePoints(int row, int point) {
 		allLabels[row * 2 + 1 + factor]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(second).asString() + ".png"));
 	}
 	if (temp < 10) {
-		allLabels[upOrDown * 9 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(myPoints).asString() + ".png"));
+		allLabels[upOrDown * 9 + 8]->setTexture(Director::getInstance()->getTextureCache()->addImage("characters/Numbers/number" + Value(temp).asString() + ".png"));
 	}
 	else if(temp < 100){
 		int first = temp / 10, second = temp % 10;

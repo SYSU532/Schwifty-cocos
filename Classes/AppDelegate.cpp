@@ -96,7 +96,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     register_all_packages();
 
     // create a scene. it's an autorelease object
-    auto scene = StartMenu::createScene();
+    auto scene = CardScene::createScene();
 
     // run
     director->runWithScene(scene);
