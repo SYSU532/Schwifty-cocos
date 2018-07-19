@@ -310,7 +310,7 @@ void CardScene::networkUpdate(float f) {
 				if (res[1] == myName) {
 					temp = 1;
 				}
-				else if (res[1] = oppoName) {
+				else if (res[1] == oppoName) {
 					temp = -1;
 				}
 				else {
