@@ -130,8 +130,16 @@ bool CardScene::init()
 void CardScene::endMyRound(Ref* r) {
 	if (!coinState)
 		return;
+	auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
+		OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
+	auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
+		DelayTime::create(0.5), NULL);
 	access0.EndRound(sessionKey);
 	nowRoundState = false; // User End this Round
+	coinState = false;
+	changeBoardState(false);
+	bCoin->runAction(downMove);
+	rCoin->runAction(upMove);
 	// Test Animation
 	auto endAnimate = Sequence::create(Show::create(),
 		ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), ScaleTo::create(0.1, 0.5), NULL);
