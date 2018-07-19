@@ -410,7 +410,7 @@ void CardScene::allEndThisRound() {
 	showBox->addChild(showPoints, 1);
 	showBox->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 + 20));
 	showBox->setScale(0.6);
-	this->addChild(showBox);
+	this->addChild(showBox, 2);
 
 	auto showPointsAnimate = Sequence::create(Show::create(),
 		ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), NULL);
@@ -867,6 +867,8 @@ void CardScene::onMouseDown(Event* e) {
 		return;
 	for (int i = 0; i < 13; i++) {
 		Sprite* sp = (Sprite*)root->getChildByTag(i);
+		if (sp == NULL)
+			continue;
 		string name = cardNames[i].second;
 		Card* target = getCardByName(name);
 		if (sp->getPosition().getDistance(pos) <= 50) {
