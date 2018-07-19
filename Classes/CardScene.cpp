@@ -91,7 +91,7 @@ bool CardScene::init()
 	endBtn->setPosition(Vec2(visibleSize.width - 120, 100));
 	endBtn->setScale(0.4);
 	auto endLabel = Label::createWithTTF("End Your Round", "fonts/Marker Felt.ttf", 40);
-	endLabel->setPosition(Vec2(endBtn->getContentSize().width / 2, endBtn->getContentSize().height / 2 - 10));
+	endLabel->setPosition(Vec2(endBtn->getContentSize().width / 2, endBtn->getContentSize().height / 2 - 6));
 	endBtn->addChild(endLabel, 1);
 	auto menu = Menu::create(endBtn, NULL);
 	menu->setPosition(Vec2::ZERO);
@@ -121,8 +121,8 @@ bool CardScene::init()
 	// Adding Trash Cards
 	myTrash = Sprite::create("trash.png");
 	oppoTrash = Sprite::create("trash.png");
-	myTrash->setPosition(Vec2(visibleSize.width - 60, 10));
-	oppoTrash->setPosition(Vec2(visibleSize.width - 60, visibleSize.height - 10));
+	myTrash->setPosition(Vec2(visibleSize.width - 30, 10));
+	oppoTrash->setPosition(Vec2(visibleSize.width - 30, visibleSize.height - 10));
 	myTrash->setScale(0.8);
 	oppoTrash->setScale(0.8);
 	this->addChild(myTrash, 1);
@@ -197,7 +197,8 @@ void CardScene::startNewRound() {
 	}
 	myBoardCards.clear();
 	// Clean Points and Label Values
-	myPoints = oppoPoints = 0;
+	myPoints = 0;
+	oppoPoints = 0;
 	for (auto& itt : MyLinePoints) {
 		itt = 0;
 	}
