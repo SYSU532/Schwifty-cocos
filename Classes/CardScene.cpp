@@ -317,7 +317,6 @@ void CardScene::networkUpdate(float f) {
 					temp = 0;
 				}
 				judgeAndShow(temp);
-				endCardScene();
 			}
 		}
 		else if (res.size() == 1) {
@@ -339,9 +338,6 @@ void CardScene::networkUpdate(float f) {
 					bCoin->runAction(upMove);
 					rCoin->runAction(downMove);
 				}
-				else if(roundNum == 3){
-
-				}
 			}
 			else if (res[0] == "goNextRound") {
 				allEndThisRound();
@@ -358,6 +354,9 @@ void CardScene::judgeAndShow(int flag) {
 	auto tie = Sprite::create("tie.png");
 	auto endAnimate = Sequence::create(Show::create(),
 		ScaleTo::create(0.3, 0.8), DelayTime::create(1.5), Hide::create(), NULL);
+	auto endAndJump = Sequence::create(endAnimate, CallFunc::create([=] {
+		endCardScene();
+	}), nullptr);
 
 	switch (flag) {
 		case 1: // My Wining
