@@ -141,7 +141,7 @@ void CardScene::preloadMusic() {
 	myAudio->preloadBackgroundMusic("music/play.mp3");
 	// Change Background music
 	myAudio->playBackgroundMusic("music/play.mp3", true);
-	myAudio->setBackgroundMusicVolume(0.7);
+	myAudio->setBackgroundMusicVolume(0.4);
 }
 
 void CardScene::endMyRound(Ref* r) {
@@ -362,20 +362,20 @@ void CardScene::judgeAndShow(int flag) {
 		case 1: // My Wining
 			victory->setScale(0.5);
 			victory->setPosition(visibleSize / 2);
-			this->addChild(victory);
+			this->addChild(victory, 2);
 			victory->runAction(endAnimate);
 			myAudio->playEffect("music/victory.mp3");
 			break;
 		case 0: // Draw
 			tie->setScale(0.5);
 			tie->setPosition(visibleSize / 2);
-			this->addChild(tie);
+			this->addChild(tie, 2);
 			tie->runAction(endAnimate);
 			break;
 		case -1: // My Failure
 			defeat->setScale(0.5);
 			defeat->setPosition(visibleSize / 2);
-			this->addChild(defeat);
+			this->addChild(defeat, 2);
 			defeat->runAction(endAnimate);
 			myAudio->playEffect("music/defeat.mp3");
 
@@ -710,7 +710,7 @@ void CardScene::onTouchEnded(Touch *touch, Event *event) {
 void CardScene::playOutACard(int i) {
 	handCardsNum--;
 	// Play effect
-	myAudio->playEffect("music/kick.mp3");
+	myAudio->playEffect("music/kick.mp3", false);
 	if (handCardsNum == 0) {
 		nowRoundState = false;
 		access0.EndRound(sessionKey);
