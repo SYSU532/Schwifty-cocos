@@ -42,7 +42,7 @@ public:
 	void showMyTurnSign();
 	void allEndThisRound();
 	void startNewRound();
-	void judgeAndShow(int win1, int win2);
+	void judgeAndShow(int flag);
 	void endCardScene();
 
 	// NetWork Listener

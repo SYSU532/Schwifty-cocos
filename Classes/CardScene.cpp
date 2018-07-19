@@ -290,16 +290,6 @@ void CardScene::networkUpdate(float f) {
 					showMyTurnSign();
 				}
 			}
-			if (win1 + win2 == 3) {
-				// Show result and Jump out
-				judgeAndShow(win1, win2);
-				endCardScene();
-			}
-			else if (deck1 == 0 && deck2 == 0) {
-				// Show running out of cards and result, Jump Out
-				judgeAndShow(win1, win2);
-				endCardScene();
-			}
 		}
 		else if (res.size() == 2) {
 			if (res[0] == "opPlay") {
@@ -314,6 +304,20 @@ void CardScene::networkUpdate(float f) {
 			}
 			else if (res[0] == "play" && oppoRoundState == false) {
 				showMyTurnSign();
+			}
+			else if (res[0] == "winner") {
+				int temp = -2;
+				if (res[1] == myName) {
+					temp = 1;
+				}
+				else if (res[1] = oppoName) {
+					temp = -1;
+				}
+				else {
+					temp = 0;
+				}
+				judgeAndShow(temp);
+				endCardScene();
 			}
 		}
 		else if (res.size() == 1) {
@@ -335,6 +339,9 @@ void CardScene::networkUpdate(float f) {
 					bCoin->runAction(upMove);
 					rCoin->runAction(downMove);
 				}
+				else if(roundNum == 3){
+
+				}
 			}
 			else if (res[0] == "goNextRound") {
 				allEndThisRound();
@@ -344,7 +351,7 @@ void CardScene::networkUpdate(float f) {
 	}
 }
 
-void CardScene::judgeAndShow(int win1, int win2) {
+void CardScene::judgeAndShow(int flag) {
 	string endingMess = "";
 	auto victory = Sprite::create("victory.png");
 	auto defeat = Sprite::create("defeat.png");
@@ -352,30 +359,27 @@ void CardScene::judgeAndShow(int win1, int win2) {
 	auto endAnimate = Sequence::create(Show::create(),
 		ScaleTo::create(0.3, 0.8), DelayTime::create(1.5), Hide::create(), NULL);
 
-	if (!myOriginFirst) {
-		int temp = win2;
-		win2 = win1;
-		win1 = temp;
-	}
-	if (win1 > win2) {
-		victory->setScale(0.5);
-		victory->setPosition(visibleSize / 2);
-		this->addChild(victory);
-		victory->runAction(endAnimate);
-		myAudio->playEffect("music/victory.mp3");
-	}
-	else if(win1 < win2){
-		defeat->setScale(0.5);
-		defeat->setPosition(visibleSize / 2);
-		this->addChild(defeat);
-		defeat->runAction(endAnimate);
-		myAudio->playEffect("music/defeat.mp3");
-	}
-	else {
-		tie->setScale(0.5);
-		tie->setPosition(visibleSize / 2);
-		this->addChild(tie);
-		tie->runAction(endAnimate);
+	switch (flag) {
+		case 1: // My Wining
+			victory->setScale(0.5);
+			victory->setPosition(visibleSize / 2);
+			this->addChild(victory);
+			victory->runAction(endAnimate);
+			myAudio->playEffect("music/victory.mp3");
+			break;
+		case 0: // Draw
+			tie->setScale(0.5);
+			tie->setPosition(visibleSize / 2);
+			this->addChild(tie);
+			tie->runAction(endAnimate);
+			break;
+		case -1: // My Failure
+			defeat->setScale(0.5);
+			defeat->setPosition(visibleSize / 2);
+			this->addChild(defeat);
+			defeat->runAction(endAnimate);
+			myAudio->playEffect("music/defeat.mp3");
+
 	}
 }
 
