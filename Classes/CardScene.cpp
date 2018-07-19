@@ -627,7 +627,7 @@ bool CardScene::onTouchBegan(Touch *touch, Event *event) {
 	for (int i = 0; i < 13; i++) {
 		Sprite* temp = (Sprite*)root->getChildByTag(i);
 		if (!temp)
-			return;
+			return false;
 		if (touch->getLocation().getDistance(temp->getPosition()) <= 40) {
 			isClick[i] = true;
 		}
