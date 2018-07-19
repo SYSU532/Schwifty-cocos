@@ -412,7 +412,7 @@ void CardScene::allEndThisRound() {
 	this->addChild(showBox, 2);
 
 	auto showPointsAnimate = Sequence::create(Show::create(),
-		ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), NULL);
+		ScaleTo::create(0.2, 0.6), DelayTime::create(2.0), Hide::create(), NULL);
 	showBox->runAction(Sequence::create(showPointsAnimate, CallFunc::create([showBox, this] {
 		showBox->removeFromParentAndCleanup(true);
 	}), nullptr));
@@ -626,6 +626,8 @@ bool CardScene::onTouchBegan(Touch *touch, Event *event) {
 		return false;
 	for (int i = 0; i < 13; i++) {
 		Sprite* temp = (Sprite*)root->getChildByTag(i);
+		if (!temp)
+			return;
 		if (touch->getLocation().getDistance(temp->getPosition()) <= 40) {
 			isClick[i] = true;
 		}
