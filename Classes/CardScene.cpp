@@ -274,28 +274,29 @@ void CardScene::networkUpdate(float f) {
 				myTurnSign->runAction(endAnimate);
 			}
 		}
-		else if (res.size() == 1 && res[0] == "opEndRound") {
-			oppoRoundState = false;
-			auto oppoEndSign = Sprite::create("redSign.png");
-			auto oppoEndLabel = Label::create("Your opponent: " + oppoName + " has ended this round!", "fonts/Marker Felt.ttf", 35);
-			oppoEndSign->setPosition(visibleSize / 2);
-			oppoEndLabel->setPosition(oppoEndSign->getContentSize() / 2);
-			oppoEndSign->addChild(oppoEndLabel, 1);
-			this->addChild(oppoEndSign);
-			oppoEndSign->runAction(Sequence::create(endAnimate, CallFunc::create([oppoEndSign, this] {
-				oppoEndSign->removeFromParentAndCleanup(true);
-			}), nullptr));
-			if (nowRoundState == false) {
-				allEndThisRound();
-				access0.GetCurrentStatus(sessionKey);
-				startNewRound();
+		else if (res.size() == 1) {
+			if (res[0] == "opEndRound") {
+				oppoRoundState = false;
+				auto oppoEndSign = Sprite::create("redSign.png");
+				auto oppoEndLabel = Label::create("Your opponent: " + oppoName + " has ended this round!", "fonts/Marker Felt.ttf", 35);
+				oppoEndSign->setPosition(visibleSize / 2);
+				oppoEndLabel->setPosition(oppoEndSign->getContentSize() / 2);
+				oppoEndSign->addChild(oppoEndLabel, 1);
+				this->addChild(oppoEndSign);
+				oppoEndSign->runAction(Sequence::create(endAnimate, CallFunc::create([oppoEndSign, this] {
+					oppoEndSign->removeFromParentAndCleanup(true);
+				}), nullptr));
+				if(nowRoundState == true){
+					myTurnSign->runAction(endAnimate);
+					coinState = true;
+					changeBoardState(true);
+					bCoin->runAction(upMove);
+					rCoin->runAction(downMove);
+				}
 			}
-			else {
-				myTurnSign->runAction(endAnimate);
-				coinState = true;
-				changeBoardState(true);
-				bCoin->runAction(upMove);
-				rCoin->runAction(downMove);
+			else if (res[0] == "goNextRound") {
+				allEndThisRound();
+				startNewRound();
 			}
 		}
 	}
