@@ -129,8 +129,8 @@ class GameSession {
     }
 
     yield(username) {
-        this.ground1.clear();
-        this.ground2.clear();
+        this.stop1 = false;
+        this.stop2 = false;
         if (this.UserOne === username) {
             this.wins2++;
         }
@@ -138,9 +138,13 @@ class GameSession {
             this.wins1++;
         }
         this.currentRound++;
+        this.ground1.clear();
+        this.ground2.clear();
     }
 
     endRound() {
+        this.stop1 = false;
+        this.stop2 = false;
         if (this.ground2.TotalAttck >= this.ground1.TotalAttck) {
             this.wins2++;
         }
@@ -148,6 +152,8 @@ class GameSession {
             this.wins1++;
         }
         this.currentRound++;
+        this.ground1.clear();
+        this.ground2.clear();
     }
 
     stopRound(username) {
