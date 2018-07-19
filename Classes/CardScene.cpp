@@ -198,7 +198,7 @@ void CardScene::startNewRound() {
 	myBoardCards.clear();
 	// Clean Points and Label Values
 	myPoints = oppoPoints = 0;
-	for (auto itt : MyLinePoints) {
+	for (auto& itt : MyLinePoints) {
 		itt = 0;
 	}
 	for (auto& sp : allLabels) {
@@ -354,7 +354,7 @@ void CardScene::judgeAndShow(int flag) {
 	auto tie = Sprite::create("tie.png");
 	auto endAnimate = Sequence::create(Show::create(),
 		ScaleTo::create(0.3, 0.8), DelayTime::create(1.5), Hide::create(), NULL);
-	auto endAndJump = Sequence::create(endAnimate, CallFunc::create([=] {
+	auto endAndJump = Sequence::create(endAnimate, CallFunc::create([this] {
 		endCardScene();
 	}), nullptr);
 
@@ -363,20 +363,20 @@ void CardScene::judgeAndShow(int flag) {
 			victory->setScale(0.5);
 			victory->setPosition(visibleSize / 2);
 			this->addChild(victory, 2);
-			victory->runAction(endAnimate);
+			victory->runAction(endAndJump);
 			myAudio->playEffect("music/victory.mp3");
 			break;
 		case 0: // Draw
 			tie->setScale(0.5);
 			tie->setPosition(visibleSize / 2);
 			this->addChild(tie, 2);
-			tie->runAction(endAnimate);
+			tie->runAction(endAndJump);
 			break;
 		case -1: // My Failure
 			defeat->setScale(0.5);
 			defeat->setPosition(visibleSize / 2);
 			this->addChild(defeat, 2);
-			defeat->runAction(endAnimate);
+			defeat->runAction(endAndJump);
 			myAudio->playEffect("music/defeat.mp3");
 
 	}
@@ -391,13 +391,13 @@ void CardScene::allEndThisRound() {
 	string roundNumber = Value(roundNum).asString();
 	string points = Value(myPoints).asString() + " : " + Value(oppoPoints).asString();
 	if (myPoints > oppoPoints) {
-		roundMess = "Round " + roundNumber + " End! You Fail";
+		roundMess = "Round " + roundNumber + " End! You Win";
 	}
 	else if (myPoints == oppoPoints) {
 		roundMess = "Round " + roundNumber + " End! It's A Tie";
 	}
 	else {
-		roundMess = "Round " + roundNumber + " End! You Win";
+		roundMess = "Round " + roundNumber + " End! You Fail";
 	}
 	// Show Labels And Points
 	auto showLabel = Label::createWithTTF(roundMess, "fonts/Marker Felt.ttf", 30);
