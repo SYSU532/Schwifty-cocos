@@ -285,9 +285,10 @@ wsServer.on('request', function(request){
                             connections[getStringMD5(gameSessionArr[instructions[1]].UserOne)].sendUTF(`opEndRound`);
                         }
                         if (result.nextRound) {
-                            if (gameSessionArr[instructions[1]].currentRound > 3) {
-                                connections[getStringMD5(gameSessionArr[instructions[1]].UserTwo)].sendUTF('winner||' + gameSessionArr[instructions[1]].Winner);
-                                connections[getStringMD5(gameSessionArr[instructions[1]].UserOne)].sendUTF('winner||' + gameSessionArr[instructions[1]].Winner);
+                            let winner = gameSessionArr[instructions[1]].Winner;
+                            if (winner !== "Unknown") {
+                                connections[getStringMD5(gameSessionArr[instructions[1]].UserTwo)].sendUTF('winner||' + winner);
+                                connections[getStringMD5(gameSessionArr[instructions[1]].UserOne)].sendUTF('winner||' + winner);
                             }
                             else {
                                 connections[getStringMD5(gameSessionArr[instructions[1]].UserOne)].sendUTF('goNextRound');
