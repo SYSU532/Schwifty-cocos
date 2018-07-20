@@ -166,6 +166,8 @@ void StartMenu::onLogupResponse(HttpClient* sender, HttpResponse* res) {
 }
 
 void StartMenu::pickRick() {
+	this->setVisible(false);
+
 	Scene* s = NULL;
 	auto username = UserDefault::getInstance()->getStringForKey("username");
 	auto has = UserDefault::getInstance()->getIntegerForKey((username + "_head").c_str());

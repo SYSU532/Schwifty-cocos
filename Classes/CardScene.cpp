@@ -84,8 +84,8 @@ bool CardScene::init()
 	myTurnSign->addChild(myTurnLabel, 1);
 	endRoundSign->setVisible(false);
 	myTurnSign->setVisible(false);
-	this->addChild(endRoundSign, 1);
-	this->addChild(myTurnSign, 1);
+	this->addChild(endRoundSign, 2);
+	this->addChild(myTurnSign, 2);
 
 	auto endBtn = MenuItemImage::create("endBtn0.png", "endBtn.png", CC_CALLBACK_1(CardScene::endMyRound, this));
 	endBtn->setPosition(Vec2(visibleSize.width - 120, 110));
@@ -327,7 +327,7 @@ void CardScene::networkUpdate(float f) {
 				auto oppoEndLabel = Label::create("Your opponent: " + oppoName + " has ended this round!", "fonts/Marker Felt.ttf", 35);
 				oppoEndSign->setPosition(visibleSize / 2);
 				oppoEndLabel->setPosition(oppoEndSign->getContentSize() / 2);
-				oppoEndSign->addChild(oppoEndLabel, 1);
+				oppoEndSign->addChild(oppoEndLabel, 2);
 				this->addChild(oppoEndSign);
 				oppoEndSign->runAction(Sequence::create(endAnimate, CallFunc::create([oppoEndSign, this] {
 					oppoEndSign->removeFromParentAndCleanup(true);
@@ -358,25 +358,26 @@ void CardScene::judgeAndShow(int flag) {
 	auto endAndJump = Sequence::create(endAnimate, CallFunc::create([this] {
 		endCardScene();
 	}), nullptr);
+	myAudio->stopBackgroundMusic();
 
 	switch (flag) {
 		case 1: // My Wining
 			victory->setScale(0.5);
 			victory->setPosition(visibleSize / 2);
-			this->addChild(victory, 2);
+			this->addChild(victory, 3);
 			victory->runAction(endAndJump);
 			myAudio->playEffect("music/victory.mp3");
 			break;
 		case 0: // Draw
 			tie->setScale(0.5);
 			tie->setPosition(visibleSize / 2);
-			this->addChild(tie, 2);
+			this->addChild(tie, 3);
 			tie->runAction(endAndJump);
 			break;
 		case -1: // My Failure
 			defeat->setScale(0.5);
 			defeat->setPosition(visibleSize / 2);
-			this->addChild(defeat, 2);
+			this->addChild(defeat, 3);
 			defeat->runAction(endAndJump);
 			myAudio->playEffect("music/defeat.mp3");
 
@@ -419,7 +420,7 @@ void CardScene::allEndThisRound() {
 	showBox->addChild(showPoints, 1);
 	showBox->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 + 20));
 	showBox->setScale(0.6);
-	this->addChild(showBox, 2);
+	this->addChild(showBox, 3);
 
 	auto showPointsAnimate = Sequence::create(Show::create(),
 		ScaleTo::create(0.2, 0.6), DelayTime::create(2.0), Hide::create(), NULL);

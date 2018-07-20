@@ -2,6 +2,7 @@
 #include "HelloWorldScene.h"
 #include "StartMenu.h"
 #include "CardScene.h"
+#include "MagicBook.h"
 
 // #define USE_AUDIO_ENGINE 1
 // #define USE_SIMPLE_AUDIO_ENGINE 1

@@ -2,6 +2,7 @@
 #include "NetWorkAccess.h"
 #include "SimpleAudioEngine.h"
 #include "CardScene.h"
+#include "MagicBook.h"
 
 USING_NS_CC;
 using namespace CocosDenshion;
@@ -503,6 +504,11 @@ void HelloWorld::onMouseMoved(Event* e) {
 void HelloWorld::onTouchMoved(Touch* touchs, Event* event) {}
 
 bool HelloWorld::onTouchBegin(Touch* touch, Event* event) {
+	if (book->getBoundingBox().containsPoint(touch->getLocation())) {
+		auto s = MagicBook::createScene();
+		auto fade = TransitionFade::create(0.8f, s);
+		Director::getInstance()->replaceScene(fade);
+	}
 	return true;
 }
 
