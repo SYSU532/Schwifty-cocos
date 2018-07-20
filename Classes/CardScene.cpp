@@ -356,6 +356,7 @@ void CardScene::judgeAndShow(int flag) {
 	auto endAnimate = Sequence::create(Show::create(),
 		ScaleTo::create(0.3, 0.8), DelayTime::create(1.5), Hide::create(), NULL);
 	auto endAndJump = Sequence::create(endAnimate, CallFunc::create([this] {
+		this->setVisible(false);
 		endCardScene();
 	}), nullptr);
 	myAudio->stopBackgroundMusic();

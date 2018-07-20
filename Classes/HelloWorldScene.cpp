@@ -387,8 +387,9 @@ void HelloWorld::sendNetWorkRequest(Node* node) {
 void HelloWorld::jumpToPlayCards(Node* node) {
 	UserDefault::getInstance()->setStringForKey("username", username);
 	UserDefault::getInstance()->setStringForKey("oppoUsername", targetUserName);
+	this->setVisible(false);
 	Scene* s = CardScene::createScene();
-	auto animate = TransitionFade::create(0.7f, s);
+	auto animate = TransitionFade::create(0.4f, s);
 	Director::getInstance()->replaceScene(animate);
 }
 
@@ -505,8 +506,9 @@ void HelloWorld::onTouchMoved(Touch* touchs, Event* event) {}
 
 bool HelloWorld::onTouchBegin(Touch* touch, Event* event) {
 	if (book->getBoundingBox().containsPoint(touch->getLocation())) {
+		this->setVisible(false);
 		auto s = MagicBook::createScene();
-		auto fade = TransitionFade::create(0.8f, s);
+		auto fade = TransitionFade::create(0.4f, s);
 		Director::getInstance()->replaceScene(fade);
 	}
 	return true;

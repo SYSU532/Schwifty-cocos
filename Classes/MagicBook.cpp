@@ -9,7 +9,7 @@ bool MagicBook::init() {
 	{
 		return false;
 	}
-	Director::getInstance()->getOpenGLView()->setFrameSize(960, 580);
+	Director::getInstance()->getOpenGLView()->setFrameSize(1400, 850);
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	myName = UserDefault::getInstance()->getStringForKey("username");
@@ -96,6 +96,7 @@ void MagicBook::networkUpdate(float f) {
 			temp->setPosition(Vec2(order_width, order_height));
 			this->addChild(temp, 1);
 		}
+		unschedule(schedule_selector(MagicBook::networkUpdate));
 	}
 	
 }
