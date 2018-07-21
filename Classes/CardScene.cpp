@@ -729,6 +729,7 @@ void CardScene::playOutACard(int i) {
 			DelayTime::create(0.5), NULL);
 
 		nowRoundState = false;
+		access0.EndRound(sessionKey);
 		coinState = false;
 		changeBoardState(false);
 		bCoin->runAction(downMove);
