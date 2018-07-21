@@ -48,7 +48,7 @@ exports.QueryUserDecks = async function(username) {
                 resolve(JSON.parse(deck.deckData));
             });
             if (res.length === 0) {
-                connection.query(initUserDecks, [username, JSON.stringify([...Array(24).keys()])], function (err, res) {
+                connection.query(initUserDecks, [username, JSON.stringify([...Array(35).keys()])], function (err, res) {
                     if (err) reject(err);
                     resolve([...Array(24).keys()]);
                 })
