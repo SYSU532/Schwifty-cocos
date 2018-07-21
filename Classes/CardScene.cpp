@@ -715,6 +715,11 @@ void CardScene::playOutACard(int i) {
 	// Play effect
 	myAudio->playEffect("music/kick.mp3", false);
 	if (handCardsNum == 0) {
+		auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
+			OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
+		auto downMove = Sequence::create(OrbitCamera::create(0.5, 1.5, 0, 0, 90, 0, 0), Hide::create(),
+			DelayTime::create(0.5), NULL);
+
 		nowRoundState = false;
 		access0.EndRound(sessionKey);
 		coinState = false;
