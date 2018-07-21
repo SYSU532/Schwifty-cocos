@@ -226,6 +226,10 @@ void CardScene::startNewRound() {
 	}
 	nowRoundState = true;
 	oppoRoundState = true;
+	if (handCardsNum == 0) {
+		nowRoundState = false;
+		access0.EndRound(sessionKey);
+	}
 }
 
 void CardScene::initMyCards(vector<string> res) {
