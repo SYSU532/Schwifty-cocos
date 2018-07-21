@@ -332,7 +332,7 @@ void CardScene::networkUpdate(float f) {
 				oppoEndSign->setPosition(visibleSize / 2);
 				oppoEndLabel->setPosition(oppoEndSign->getContentSize() / 2);
 				oppoEndSign->addChild(oppoEndLabel, 2);
-				this->addChild(oppoEndSign);
+				this->addChild(oppoEndSign, 2);
 				oppoEndSign->runAction(Sequence::create(endAnimate, CallFunc::create([oppoEndSign, this] {
 					oppoEndSign->removeFromParentAndCleanup(true);
 				}), nullptr));
@@ -470,10 +470,9 @@ void CardScene::initLines() {
 
 void CardScene::addOppoCard(int index) {
 	auto root = Director::getInstance()->getRunningScene();
-	int oppoCardSize = opponentCards.size();
-	auto tt = opponentCards[oppoCardSize - 1];
-	opponentCards.pop_back();
+	auto tt = opponentCards.back();
 	tt->removeFromParentAndCleanup(true);
+	opponentCards.pop_back();
 	Card* target = getCardByID(index);
 	// Create show image
 	string path0 = "characters/Decks/" + target->type + "/" + target->name + ".png";
