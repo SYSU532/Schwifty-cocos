@@ -718,6 +718,10 @@ void CardScene::playOutACard(int i) {
 	handCardsNum--;
 	// Play effect
 	myAudio->playEffect("music/kick.mp3", false);
+	auto target = cardNames[i].second;
+	auto theCard = getCardByName(target);
+	access0.PlayOutaCard(sessionKey, theCard->index);
+
 	if (handCardsNum == 0) {
 		auto upMove = Sequence::create(DelayTime::create(0.5), Show::create(),
 			OrbitCamera::create(0.5, 1.5, 0, 180, 90, 0, 0), NULL);
@@ -735,9 +739,6 @@ void CardScene::playOutACard(int i) {
 			ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), ScaleTo::create(0.1, 0.5), NULL);
 		endRoundSign->runAction(endAnimate);
 	}
-	auto target = cardNames[i].second;
-	auto theCard = getCardByName(target);
-	access0.PlayOutaCard(sessionKey, theCard->index);
 }
 
 void CardScene::changePoints(int row, int point) {
