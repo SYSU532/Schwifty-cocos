@@ -717,6 +717,14 @@ void CardScene::playOutACard(int i) {
 	if (handCardsNum == 0) {
 		nowRoundState = false;
 		access0.EndRound(sessionKey);
+		coinState = false;
+		changeBoardState(false);
+		bCoin->runAction(downMove);
+		rCoin->runAction(upMove);
+		// Test Animation
+		auto endAnimate = Sequence::create(Show::create(),
+			ScaleTo::create(0.2, 0.6), DelayTime::create(0.8), Hide::create(), ScaleTo::create(0.1, 0.5), NULL);
+		endRoundSign->runAction(endAnimate);
 	}
 	auto target = cardNames[i].second;
 	auto theCard = getCardByName(target);
