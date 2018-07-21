@@ -122,7 +122,7 @@ wsServer.on('request', function(request){
 
     conn.on('message', async function(data){
         let str = data.utf8Data;
-        console.log(str);
+        console.log(conn.user + ": " + str);
         let instructions = str.split('&&');
         console.log(instructions);
         switch (instructions[0].toLowerCase()) {
