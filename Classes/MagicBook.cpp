@@ -80,18 +80,18 @@ void MagicBook::networkUpdate(float f) {
 		return;
 
 	if (res[0] == "allDeck" && res[1] == myName) {
-		int order_height = 35, order_width = 90;
-		for (int i = 2; i < res.size(); i++) {
+		int order_height = 20, order_width = 90;
+		for (int i = 2; i < 34; i++) {
 			auto targetCard = getCardByID(Value(res[i]).asInt());
 			string path = "characters/Decks/" + targetCard->type + "/" + targetCard->name + ".png";
 			auto temp = Sprite::create(path);
 			temp->setScale(0.24);
-			if ((i - 2) % 6 == 0) {
-				order_height += 110;
+			if ((i - 2) % 8 == 0) {
+				order_height += 115;
 				order_width = 135;
 			}
 			else {
-				order_width += 135;
+				order_width += 98;
 			}
 			temp->setPosition(Vec2(order_width, order_height));
 			this->addChild(temp, 1);

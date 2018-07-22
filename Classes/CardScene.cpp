@@ -47,7 +47,7 @@ bool CardScene::init()
 	this->addChild(rCoin, 1);
 	this->addChild(bCoin, 1);
 
-	schedule(schedule_selector(CardScene::networkUpdate), 0.02f, kRepeatForever, 0);
+	schedule(schedule_selector(CardScene::networkUpdate), 0.01f, kRepeatForever, 0);
 
 	nowMsg = "";
 	nowRoundState = true;
@@ -364,6 +364,9 @@ void CardScene::judgeAndShow(int flag) {
 		endCardScene();
 	}), nullptr);
 	myAudio->stopBackgroundMusic();
+	for (auto& it : opponentCards) {
+		it->removeFromParentAndCleanup(true);
+	}
 
 	switch (flag) {
 		case 1: // My Wining
@@ -471,6 +474,7 @@ void CardScene::initLines() {
 void CardScene::addOppoCard(int index) {
 	auto root = Director::getInstance()->getRunningScene();
 	auto tt = opponentCards.back();
+	tt->setVisible(false);
 	tt->removeFromParentAndCleanup(true);
 	opponentCards.pop_back();
 	Card* target = getCardByID(index);
